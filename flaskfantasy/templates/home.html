@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block content %}
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.begin(class="btn-info") }}
+        </div>
+    </form>
+{% endblock content %}
