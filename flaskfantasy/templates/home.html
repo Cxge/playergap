@@ -1,9 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.begin(class="btn-info btn-lg") }}
-        </div>
-    </form>
+    <div class="col-md-12 text-center">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.begin(class="btn-info btn-lg") }}
+            </div>
+        </form>
+    </div>
 {% endblock content %}
