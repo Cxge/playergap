@@ -1,1 +1,1 @@
-web: gunicorn app:flaskfantasy.__init__
+web: gunicorn run:app
