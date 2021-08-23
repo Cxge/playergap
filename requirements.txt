@@ -1,30 +1,33 @@
-Bottleneck @ file:///C:/ci/bottleneck_1607557040328/work
+Bottleneck==1.3.2
 certifi==2021.5.30
-click @ file:///tmp/build/80754af9/click_1621604852318/work
+click==8.0.1
 colorama==0.4.4
 et-xmlfile==1.1.0
-Flask @ file:///home/ktietz/src/ci/flask_1611932660458/work
+Flask==1.1.2
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
-greenlet @ file:///C:/ci/greenlet_1620913839232/work
+greenlet==1.1.0
 gunicorn==20.1.0
-importlib-metadata @ file:///C:/ci/importlib-metadata_1617877477759/work
-itsdangerous @ file:///tmp/build/80754af9/itsdangerous_1621432558163/work
-Jinja2 @ file:///tmp/build/80754af9/jinja2_1624781299557/work
-MarkupSafe @ file:///C:/ci/markupsafe_1621528502553/work
+importlib-metadata==3.10.0
+itsdangerous==2.0.1
+Jinja2==3.0.1
+MarkupSafe==2.0.1
 mkl-fft==1.3.0
-mkl-random @ file:///C:/ci/mkl_random_1626186184308/work
+mkl-random==1.2.2
 mkl-service==2.4.0
-numexpr @ file:///C:/ci/numexpr_1618856728739/work
-numpy @ file:///C:/ci/numpy_and_numpy_base_1626271900803/work
+numexpr==2.7.3
+numpy==1.20.3
 openpyxl==3.0.7
-pandas @ file:///C:/ci/pandas_1626784227284/work
+pandas==1.3.0
+pip==21.1.3
 psycopg2==2.9.1
-python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
-pytz @ file:///tmp/build/80754af9/pytz_1612215392582/work
-six @ file:///tmp/build/80754af9/six_1623709665295/work
-SQLAlchemy @ file:///C:/ci/sqlalchemy_1626948551162/work
-Werkzeug @ file:///home/ktietz/src/ci/werkzeug_1611932622770/work
+python-dateutil==2.8.2
+pytz==2021.1
+setuptools==52.0.0.post20210125
+six==1.16.0
+SQLAlchemy==1.4.22
+Werkzeug==1.0.1
+wheel==0.36.2
 wincertstore==0.2
 WTForms==2.3.3
-zipp @ file:///tmp/build/80754af9/zipp_1625570634446/work
+zipp==3.5.0
