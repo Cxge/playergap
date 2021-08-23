@@ -1,1 +1,1 @@
-web: gunicorn flaskfantasy.wsgi
+web: gunicorn app:flaskfantasy.__init__
