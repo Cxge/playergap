@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, redirect, flash
+from flask import render_template, url_for, request, redirect, flash, session
 from flaskfantasy import app
 from flaskfantasy.forms import SettingsForm, PlayerSelectionForm, BeginForm
 import pandas as pd
@@ -20,9 +20,19 @@ def home():
 
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
-    global pick_num, dfTopPlayersAvail, dfTopPlayersNextRd, dfDraft, next_pick_in, next_pick, next_round
+    #global pick_num, dfTopPlayersAvail, dfTopPlayersNextRd, next_pick_in, next_pick, next_round
     form = SettingsForm()
     if form.validate_on_submit():
+        return redirect(url_for('draft'))
+    return render_template('settings.html', title='Settings', form=form)
+
+@app.route("/draft", methods=['POST', 'GET'])
+def draft():
+    #global pick_num, dfTopPlayersAvail, dfTopPlayersNextRd, next_pick_in
+    settings_form = SettingsForm()
+    selection_form = PlayerSelectionForm()
+    if settings_form.save_settings.data and request.method == 'POST':
+        global player_list, pick_num, dfTopPlayersAvail, dfTopPlayersNextRd, next_pick_in, dfDraft, next_round, next_pick
         scoring_format = request.form['scoring_format']
         num_teams = int(request.form['num_teams'])
         projections_source = request.form['projections_source']
@@ -77,7 +87,6 @@ def settings():
         #dfDraft['fantasy_points'] = dfDraft['fantasy_points'].round(1)
         dfDraft = dfDraft.sort_values('fantasy_points', ascending=False)
         num_rounds = 15
-        num_teams = 12
         next_pick = []
         next_round = []
         next_pick_in = []
@@ -102,15 +111,7 @@ def settings():
         dfTopPlayersAvail['priority'] = np.where(dfTopPlayersAvail['adp'] >= pick_num + next_pick_in[pick_num - 1], 'Low', 'High')
         #END QUERY
         
-        return redirect(url_for('draft'))
-    return render_template('settings.html', title='Settings', form=form)      
-
-@app.route("/draft", methods=['GET','POST'])
-def draft():
-    global pick_num, dfTopPlayersAvail, dfTopPlayersNextRd, dfDraft, next_pick_in
-    selection_form = PlayerSelectionForm()
-    player_list = sorted(dfDraft['player'].tolist())
-    if selection_form.submit_selection.data and selection_form.validate_on_submit():
+    elif selection_form.submit_selection.data and selection_form.validate_on_submit():
         #selection = request.form['selection']
         selection = selection_form.selection.data
         if selection not in player_list:
@@ -137,6 +138,7 @@ def draft():
             dfTopPlayersAvail['priority'] = np.where(dfTopPlayersAvail['adp'] >= pick_num + next_pick_in[pick_num - 1], 'Low', 'High')
             return redirect(url_for('draft'))
     
+    player_list = sorted(dfDraft['player'].tolist())
     dfTopPlayersAvailDict = dfTopPlayersAvail[['rank', 'player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'priority']].to_dict(orient='records')
     Cols1 = ['', 'PLAYER', 'POS', 'FPTS', 'VOR', '%', 'ADP', 'URGENCY']
     dfTopPlayersNextRdDict = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')
