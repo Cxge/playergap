@@ -4,9 +4,11 @@ from flaskfantasy.forms import SettingsForm, PlayerSelectionForm, BeginForm
 import pandas as pd
 import numpy as np
 import psycopg2
+from psycopg2.extensions import parse_dsn
 import os
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = parse_dsn(os.environ.get('DATABASE_URL'))
+#DATABASE_URL = os.environ.get('DATABASE_URL')
 
 @app.route("/", methods=['GET','POST'])
 @app.route("/home", methods=['GET','POST'])
@@ -29,7 +31,9 @@ def settings():
         format_values = {'Half-PPR':[0.04, 4, -2, 0.1, 6, 0.5, 0.1, 6],
                          'PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6],
                          'Non-PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6]}
-        con = psycopg2.connect(DATABASE_URL, sslmode='require')
+        
+        con = psycopg2.connect(f"dbname={DATABASE_URL.get('dbname')} user={DATABASE_URL.get('user')} password={DATABASE_URL.get('password')} host={DATABASE_URL.get('host')} port={DATABASE_URL.get('port')}")
+        #con = psycopg2.connect()
         cur = con.cursor()
         proj_query = f"""SELECT player, position, passing_yard   * {format_values[scoring_format][0]}
                                                 + passing_td     * {format_values[scoring_format][1]}
