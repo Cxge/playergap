@@ -4,10 +4,9 @@ from flaskfantasy.forms import SettingsForm, PlayerSelectionForm, BeginForm
 import pandas as pd
 import numpy as np
 import psycopg2
+import os
 
-#ESTO SE VA A REEMPLAZAR POR LA BASE DE DATOS
-path = 'C:\\Users\\Ernesto Cortés\\MyPythonScripts\\Flask_Fantasy\\flaskfantasy\\'
-
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 @app.route("/", methods=['GET','POST'])
 @app.route("/home", methods=['GET','POST'])
@@ -30,11 +29,7 @@ def settings():
         format_values = {'Half-PPR':[0.04, 4, -2, 0.1, 6, 0.5, 0.1, 6],
                          'PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6],
                          'Non-PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6]}
-        con = psycopg2.connect(user='postgres',
-                password='aeae1994',
-                host='localhost',
-                port='5432',
-                database='fantasy_football')
+        con = psycopg2.connect(DATABASE_URL, sslmode='require')
         cur = con.cursor()
         proj_query = f"""SELECT player, position, passing_yard   * {format_values[scoring_format][0]}
                                                 + passing_td     * {format_values[scoring_format][1]}
