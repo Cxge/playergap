@@ -63,14 +63,15 @@ def draft():
         # session['pick_num'] += 1
         # return redirect(url_for('draft'))
         
-        if selection not in player_list:
-            flash(f'There is no player named "{selection}". Please try again', 'danger')
-            return redirect(url_for('draft'))
-        elif  selection in session['selected_players']:
+        if  selection in session['selected_players']:
             flash(f'{selection} has already been selected. Please try again', 'warning')
+            return redirect(url_for('draft'))
+        elif selection not in player_list:
+            flash(f'There is no player named "{selection}". Please try again', 'danger')
             return redirect(url_for('draft'))
         else:
             flash(f'{selection} has been selected', 'success')
+            selection = selection.replace("'", "''") #Single quote escape for PostgreSQL query
             session['selected_players'].append(selection)
             session['pick_num'] += 1
         return redirect(url_for('draft'))
