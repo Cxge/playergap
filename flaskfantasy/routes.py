@@ -59,11 +59,12 @@ def draft():
         
     elif selection_form.submit_selection.data and selection_form.validate_on_submit():
         selection = request.form['selection']
+        selection_alt = selection.replace("'", "''")
         # session['selected_players'].append(selection)
         # session['pick_num'] += 1
         # return redirect(url_for('draft'))
         
-        if  selection in session['selected_players']:
+        if  selection_alt in session['selected_players']:
             flash(f'{selection} has already been selected. Please try again', 'warning')
             return redirect(url_for('draft'))
         elif selection not in player_list:
