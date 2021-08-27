@@ -129,7 +129,7 @@ def draft():
     dfTopPlayersAvail['priority'] = np.where(dfTopPlayersAvail['adp'] >= session['pick_num'] + session['next_pick_in'][session['pick_num'] - 1], 'Low', 'High')
     
     dfTopPlayersAvailDict = dfTopPlayersAvail[['rank', 'player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'priority']].to_dict(orient='records')
-    Cols1 = ['', 'PLAYER', 'POS', 'FPTS', 'VOR', '%', 'ADP', 'URGENCY']
+    Cols1 = ['', 'PLAYER', 'POS', 'FPTS', 'GAP', '%', 'ADP', 'URGENCY']
     dfTopPlayersNextRdDict = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')
     Cols2 = ['PLAYER', 'POS', 'FPTS', 'ADP']
     
