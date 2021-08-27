@@ -11,6 +11,10 @@ class SettingsForm(FlaskForm):
                              choices=[8, 10, 12, 14],
                              default=12)
     
+    roster_size = SelectField('Roster size', validators=[DataRequired()],
+                              choices=[13, 14, 15, 16],
+                              default=15)
+    
     projections_source = SelectField('Fantasy points projections data source', validators=[DataRequired()],
                          choices=['FFToday'])
     
