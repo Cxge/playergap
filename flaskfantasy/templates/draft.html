@@ -10,12 +10,7 @@
                             <fieldset class="form-group">
                                 <legend class="border-bottom mb-4">{{ pick_label }}<br><small>{{ overall_pick_label }}</small></legend>
                                 <div class="form-group">
-                                    {{ form.selection(class="form-control", list="player_list", placeholder="-- Select Player --") }}
-                                    <datalist id="player_list">
-                                        {% for player in player_list %}
-                                        <option value="{{ player }}">
-                                        {% endfor %}
-                                    </datalist>
+                                    {{ form.selection(class="form-control selectpicker", data_live_search="true", title="Choose a player") }}
                                 </div>
                             </fieldset>
                             <div>

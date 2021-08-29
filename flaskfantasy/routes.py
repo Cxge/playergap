@@ -26,7 +26,6 @@ def settings():
 
 @app.route("/draft", methods=['POST', 'GET'])
 def draft():
-    global player_list
     settings_form = SettingsForm()
     selection_form = PlayerSelectionForm()
     if settings_form.save_settings.data and request.method == 'POST':      
@@ -37,7 +36,6 @@ def draft():
         session['adp_source'] = request.form['adp_source']
         session['pick_num'] = 1
         session['selected_players'] = ['Placeholder']
-        
         next_pick = []
         next_round = []
         next_pick_in = []
@@ -51,25 +49,18 @@ def draft():
         session['next_pick'] = next_pick
         session['next_pick_in'] = next_pick_in
         session['next_round'] = next_round
-        
-    elif selection_form.submit_selection.data and selection_form.validate_on_submit():
+
+    elif selection_form.submit_selection.data and request.method == 'POST':
         selection = request.form['selection']
-        selection_alt = selection.replace("'", "''")     
-        if  selection_alt in session['selected_players']:
-            flash(f'{selection} has already been selected. Please try again', 'warning')
-            return redirect(url_for('draft'))
-        elif selection not in player_list:
-            flash(f'There is no player named "{selection}". Please try again', 'danger')
-            return redirect(url_for('draft'))
+        session['pick_num'] += 1
+        if session['pick_num'] == session['roster_size'] * session['num_teams']:
+            flash('That was the last pick of the draft. Good luck!', 'success')
+            return redirect(url_for('home'))
         else:
             flash(f'{selection} has been selected', 'success')
             selection = selection.replace("'", "''") #Single quote escape for PostgreSQL query
             session['selected_players'].append(selection)
-            session['pick_num'] += 1
-            if session['pick_num'] == session['roster_size'] * session['num_teams']:
-                flash('That was the last pick of the draft. Good luck!', 'success')
-                return redirect(url_for('home'))
-        return redirect(url_for('draft'))
+            return redirect(url_for('draft'))
         
     selected_players_array = ','.join(f"'{p}'" for p in session['selected_players']) 
     format_values = {'Half-PPR':[0.04, 4, -2, 0.1, 6, 0.5, 0.1, 6],
@@ -114,7 +105,8 @@ def draft():
     con.close()
     dfDraft['fantasy_points'] =  dfDraft['fantasy_points'].astype(float).round(1)
     dfDraft['adp'] =  dfDraft['adp'].astype(float)
-    player_list = sorted(dfDraft['player'].tolist())
+    player_list = dfDraft.sort_values('adp')['player'].tolist()
+    selection_form.selection.choices = player_list
        
     dfTopPlayersAvail = dfDraft.groupby('position').head(3)[['player', 'position', 'adp', 'fantasy_points']]
     dfTopPlayersNextRd = dfDraft.sort_values('adp')

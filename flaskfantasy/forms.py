@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, StringField
+from wtforms import SelectField, SubmitField
 from wtforms.validators import DataRequired
 
 class SettingsForm(FlaskForm):
@@ -24,7 +24,7 @@ class SettingsForm(FlaskForm):
     save_settings = SubmitField('Next')
     
 class PlayerSelectionForm(FlaskForm):
-    selection = StringField('Select player', validators=[DataRequired()], render_kw={'autofocus':True})
+    selection = SelectField('Select player', validators=[DataRequired()], render_kw={'autofocus':True})
     
     submit_selection = SubmitField('Submit')
     
