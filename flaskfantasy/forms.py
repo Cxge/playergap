@@ -8,7 +8,7 @@ class SettingsForm(FlaskForm):
                                  default='Half-PPR')
     
     num_teams = SelectField('Number of teams', validators=[DataRequired()],
-                             choices=[8, 10, 12, 14],
+                             choices=[8, 10, 12, 14, 16],
                              default=12)
     
     roster_size = SelectField('Roster size', validators=[DataRequired()],
