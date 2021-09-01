@@ -1,6 +1,6 @@
 from flask import render_template, url_for, request, redirect, flash, session
 from flaskfantasy import app
-from flaskfantasy.forms import SettingsForm, PlayerSelectionForm, BeginForm
+from flaskfantasy.forms import SettingsForm, BeginForm
 import pandas as pd
 import numpy as np
 import psycopg2
@@ -24,45 +24,62 @@ def settings():
         return redirect(url_for('draft'))
     return render_template('settings.html', title='Settings', form=form)
 
-@app.route("/draft", methods=['POST', 'GET'])
+@app.route("/select/<string:player>")
+def select_player(player):
+    session['pick_num'] += 1
+    if session['pick_num'] == (session['roster_size'] - 1) * session['num_teams']:
+        flash('That was the last pick of the draft. Good luck!', 'success')
+        return redirect(url_for('home'))
+    else:
+        player = player.replace("'", "''") #Single quote escape for PostgreSQL query
+        session['selected_players'].append(player)
+        return redirect(url_for('draft'))
+
+@app.route("/draft", methods=['GET', 'POST'])
 def draft():
     settings_form = SettingsForm()
-    selection_form = PlayerSelectionForm()
     if settings_form.save_settings.data and request.method == 'POST':      
+        session.clear()
         session['scoring_format'] = request.form['scoring_format']
         session['num_teams'] = int(request.form['num_teams'])
-        session['roster_size'] = int(request.form['roster_size'])
+        session['roster_size'] = int(request.form['roster_size']) + 1 #One extra round to have something to compare to in the last one
         session['projections_source'] = request.form['projections_source']
         session['adp_source'] = request.form['adp_source']
         session['pick_num'] = 1
-        session['selected_players'] = ['Placeholder']
-        next_pick = []
-        next_round = []
-        next_pick_in = []
-        for i in range(session['roster_size'] + 1): #One extra round to have something to compare to
-            for j in range(session['num_teams']):
-                next_round.append(i + 1)
-            next_pick += range(1, session['num_teams'] + 1)
-            next_pick_in += reversed(range(1, session['num_teams'] * 2, 2))
-        next_pick_in = [session['num_teams'] * 2 if n == 1 else n for n in next_pick_in]
+        session['selected_players'] = ['Placeholder']    
+    
+    lst_picks_ov = []
+    lst_picks_ov = [*range(1, session['roster_size'] * session['num_teams'] + 1)]
+    
+    lst_picks = []
+    next_pick_in = []    
+    for i in range(1, session['roster_size'] + 1):
+        for j in range(1, session['num_teams'] + 1):
+            lst_picks.append(str(i) + '.' + str(j))
+        next_pick_in += reversed(range(1, session['num_teams'] * 2, 2))
+    next_pick_in = [session['num_teams'] * 2 if n == 1 else n for n in next_pick_in]
         
-        session['next_pick'] = next_pick
-        session['next_pick_in'] = next_pick_in
-        session['next_round'] = next_round
-
-    elif selection_form.submit_selection.data and request.method == 'POST':
-        selection = request.form['selection']
-        session['pick_num'] += 1
-        if session['pick_num'] == session['roster_size'] * session['num_teams']:
-            flash('That was the last pick of the draft. Good luck!', 'success')
-            return redirect(url_for('home'))
+    team_picking = []
+    for j in range(1, session['roster_size'] + 1):
+        if j % 2 == 0:
+            team_picking += reversed(range(1, session['num_teams'] + 1))
         else:
-            flash(f'{selection} has been selected', 'success')
-            selection = selection.replace("'", "''") #Single quote escape for PostgreSQL query
-            session['selected_players'].append(selection)
-            return redirect(url_for('draft'))
-        
+            team_picking += range(1, session['num_teams'] + 1)
+    
+    team_picks = []
+    for i in range(1, session['roster_size'] + 1):
+        if i % 2 == 0:
+            team_picks.append(i * session['num_teams'] - team_picking[session['pick_num'] - 1] + 1)
+        else:
+            team_picks.append((i - 1) * session['num_teams'] + team_picking[session['pick_num'] - 1])
+            
+    team_roster = ['Placeholder']     
+    if session['pick_num'] > session['num_teams']:
+        team_roster = [session['selected_players'][i] for i in team_picks[:((session['pick_num'] - 1) // session['num_teams'])]]
+
     selected_players_array = ','.join(f"'{p}'" for p in session['selected_players']) 
+    team_roster_array = ','.join(f"'{p}'" for p in team_roster)
+    
     format_values = {'Half-PPR':[0.04, 4, -2, 0.1, 6, 0.5, 0.1, 6],
                      'PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6],
                      'Non-PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6]}
@@ -101,41 +118,61 @@ def draft():
     cur.execute(query)
     
     dfDraft = pd.DataFrame(cur.fetchall(), columns=['player', 'position', 'fantasy_points', 'adp'])
+    
+    query = f""" 
+    SELECT position, player
+    FROM projections
+    WHERE source_name = '{session['projections_source']}'
+    AND source_update = (SELECT MAX(source_update) FROM projections WHERE source_name = '{session['projections_source']}')
+    AND player IN ({team_roster_array})
+    ORDER BY position
+    
+            """
+    cur.execute(query)
+    
+    dfRoster = pd.DataFrame(cur.fetchall(), columns=['position', 'player'])        
+    
     cur.close()
     con.close()
     dfDraft['fantasy_points'] =  dfDraft['fantasy_points'].astype(float).round(1)
-    dfDraft['adp'] =  dfDraft['adp'].astype(float)
+    dfDraft['adp'] =  dfDraft['adp'].astype(float).fillna(999)
     player_list = dfDraft.sort_values('adp')['player'].tolist()
-    selection_form.selection.choices = player_list
-       
-    dfTopPlayersAvail = dfDraft.groupby('position').head(3)[['player', 'position', 'adp', 'fantasy_points']]
+    
     dfTopPlayersNextRd = dfDraft.sort_values('adp')
-    dfTopPlayersNextRd = dfTopPlayersNextRd.tail(len(dfTopPlayersNextRd) - session['next_pick_in'][session['pick_num'] - 1])
+    dfTopPlayersNextRd = dfTopPlayersNextRd.tail(len(dfTopPlayersNextRd) - next_pick_in[session['pick_num'] - 1])
+    #AGREGAR QB DE A MENTIS CON CERO PUNTOS?
     dfTopPlayersNextRd = dfTopPlayersNextRd.groupby('position').head(1)[['player', 'position', 'adp', 'fantasy_points']]
     dict_pos = dict(zip(dfTopPlayersNextRd['position'], dfTopPlayersNextRd['fantasy_points']))
-    dfTopPlayersAvail['vor_pts'] = dfTopPlayersAvail.apply(lambda row: row['fantasy_points'] - dict_pos.get(row['position']), axis=1).round(1)
-    dfTopPlayersAvail['vor_pct'] = dfTopPlayersAvail.apply(lambda row: (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
-    dfTopPlayersAvail['rank'] = dfTopPlayersAvail['vor_pct'].rank(method='first', ascending=False)
-    dfTopPlayersAvail['rank'] = dfTopPlayersAvail['rank'].astype(int)
-    dfTopPlayersAvail = dfTopPlayersAvail.sort_values(by='rank', ascending=True)[['rank', 'player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
-    dfTopPlayersAvail['priority'] = np.where(dfTopPlayersAvail['adp'] >= session['pick_num'] + session['next_pick_in'][session['pick_num'] - 1], 'Low', 'High')
+    dfDraft['vor_pts'] = dfDraft.apply(lambda row: row['fantasy_points'] - (dict_pos.get(row['position'])), axis=1).round(1)
+    dfDraft['vor_pct'] = dfDraft.apply(lambda row: (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
+    dfDraft['rank'] = dfDraft['vor_pct'].rank(method='first', ascending=False)
+    dfDraft['rank'] = dfDraft['rank'].astype(int)
+    dfTopPlayersAvail = dfDraft.sort_values(by='rank', ascending=True)[['rank', 'player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
+    dfTopPlayersAvail['priority'] = np.where(dfTopPlayersAvail['adp'] >= session['pick_num'] + next_pick_in[session['pick_num'] - 1], 'Low', 'High')
     
     dfTopPlayersAvailDict = dfTopPlayersAvail[['rank', 'player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'priority']].to_dict(orient='records')
-    Cols1 = ['', 'PLAYER', 'POS', 'FPTS', 'GAP', '%', 'ADP', 'URGENCY']
+    Cols1 = ['', 'Rk', 'Player', 'Pos', 'FPts', 'Gap', '%', 'ADP', 'Urgency']
     dfTopPlayersNextRdDict = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')
-    Cols2 = ['PLAYER', 'POS', 'FPTS', 'ADP']
-    
-    pick_label = 'Pick: ' + str(session['next_round'][session['pick_num'] - 1]) + '.' + str(session['next_pick'][session['pick_num'] - 1])
-    overall_pick_label = 'Overall: ' + str(session['pick_num'])
-    next_pick_label = 'Next Pick: ' + str(session['next_round'][session['pick_num'] + session['next_pick_in'][session['pick_num'] - 1] - 1]) + '.' + str(session['next_pick'][session['pick_num'] + session['next_pick_in'][session['pick_num'] - 1] - 1])
-    overall_next_pick_label = 'Overall: ' + str(session['pick_num'] + session['next_pick_in'][session['pick_num'] - 1])
-    return render_template('draft.html', title='Draft', form=selection_form, 
-                           pick_label=pick_label, 
-                           overall_pick_label=overall_pick_label,
-                           next_pick_label=next_pick_label,
-                           overall_next_pick_label=overall_next_pick_label,
-                           player_list=player_list,
-                           headings1=Cols1, data1=dfTopPlayersAvailDict,
-                           headings2=Cols2, data2=dfTopPlayersNextRdDict)
+    Cols2 = ['Player', 'Pos', 'FPts', 'ADP']
+    dfRoster = dfRoster.to_dict(orient='records')
+    Cols3 = ['Pos', 'Player']
+       
+    pick_label = 'Current Pick: ' + lst_picks[session['pick_num'] - 1]
+    overall_pick_label = '#' + str(session['pick_num']) + ' Overall'
+    next_pick_label = 'Next Pick: ' + lst_picks[session['pick_num'] + next_pick_in[session['pick_num'] - 1] - 1]
+    overall_next_pick_label = '#' + str(lst_picks_ov[session['pick_num'] + next_pick_in[session['pick_num'] - 1] - 1]) + ' Overall'
+    team_picking_label = str(team_picking[session['pick_num'] - 1])
+    return render_template('draft.html', title='Draft', 
+                            pick_label=pick_label, 
+                            overall_pick_label=overall_pick_label,
+                            next_pick_label=next_pick_label,
+                            overall_next_pick_label=overall_next_pick_label,
+                            player_list=player_list,
+                            headings1=Cols1, data1=dfTopPlayersAvailDict,
+                            headings2=Cols2, data2=dfTopPlayersNextRdDict,
+                            selected_players = session['selected_players'][1:],
+                            team_picking_label=team_picking_label,
+                            headings3=Cols3, data3=dfRoster)
+
 
 

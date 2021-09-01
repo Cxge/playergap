@@ -1,29 +1,48 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-9">
             <div class="row">
-                <div class="col-md-12">
-                    <div class="content-section">
-                        <form method="POST" action="/draft">
-                            {{ form.hidden_tag() }}
-                            <fieldset class="form-group">
-                                <legend class="border-bottom mb-4">{{ pick_label }}<br><small>{{ overall_pick_label }}</small></legend>
-                                <div class="form-group">
-                                    {{ form.selection(class="form-control selectpicker", data_live_search="true", title="Choose a player") }}
-                                </div>
-                            </fieldset>
-                            <div>
-                                {{ form.submit_selection(class="btn-info") }}
-                            </div>
-                        </form>
-                    </div>
+                <div class="col-md-12">        
+                    <div class="content-section table-responsive">
+                        <legend class="border-bottom"><small><b>{{ pick_label }}  -  {{ overall_pick_label }}</b></small></legend>
+                        <table class="table table-sm table-hover mydatatable">
+                            <thead class="thead-light">
+                                <tr>
+                                    {% for row in headings1 %}
+                                    <th scope="col" class="text-center">{{ row }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in data1 %}
+                                <tr>
+                                    <td align="right"><a href="/select/{{ row.player }}" class="btn btn-info btn-sm">Pick</a></td>
+                                    <td align="right"><b>{{ row.rank }}.</b></td>
+                                    <td align="left">{{ row.player }}</td>
+                                    <td align="center">{{ row.position }}</td>
+                                    <td align="right">{{ row.fantasy_points }}</td>
+                                    <td align="right">{{ row.vor_pts }}</td>
+                                    {% if row.vor_pct < 0 %}
+                                        <td align="right" style="color: red"><b>{{ row.vor_pct }}</b></td>
+                                    {% elif row.vor_pct > 0 %}
+                                        <td align="right" style="color: green"><b>+{{ row.vor_pct }}</b></td>
+                                    {% else %}
+                                        <td align="right"><b>{{ row.vor_pct }}</b></td>
+                                    {% endif %}
+                                    <td align="right">{{ row.adp }}</td>
+                                    <td align="center">{{ row.priority }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div> 
                 </div>
                 <div class="col-md-12">
                     <div class="content-section">
-                    <legend class="border-bottom mb-2">{{ next_pick_label }}<br><small>{{ overall_next_pick_label }}</small></legend>
+                    <legend class="border-bottom"><small><b>{{ next_pick_label }}  -  {{ overall_next_pick_label }}</b></small></legend>
                         <legend><small>Replacements</small></legend>
-                        <table class="table table-hover">
+                        <table class="table table-sm table-hover">
                             <thead class="thead-light">
                                 <tr>
                                     {% for row in headings2 %}
@@ -43,42 +62,35 @@
                             </tbody>
                         </table>
                     </div> 
+                </div>                
+            </div>   
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="content-section">
+                    <legend class="border-bottom"><small><b>Rosters</b></small></legend>
+                        <legend><small>Team {{ team_picking_label }}</small></legend>
+                        <table class="table table-borderless table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    {% for row in headings3 %}
+                                    <th scope="col" class="text-center">{{ row }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in data3 %}
+                                <tr>
+                                    <td align="center">{{ row.position }}</td>
+                                    <td align="left">{{ row.player }}</td> 
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>    
-        <div class="col-md-8">
-            <div class="content-section">
-                <legend><small>Top 3 players available per position</small></legend>
-                <table class="table table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            {% for row in headings1 %}
-                            <th scope="col" class="text-center">{{ row }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in data1 %}
-                        <tr>
-                            <td align="right"><b>{{ row.rank }}.</b></td>
-                            <td align="left">{{ row.player }}</td>
-                            <td align="center">{{ row.position }}</td>
-                            <td align="right">{{ row.fantasy_points }}</td>
-                            <td align="right">{{ row.vor_pts }}</td>
-                            {% if row.vor_pct < 0 %}
-                                <td align="right" style="color: red"><b>{{ row.vor_pct }}</b></td>
-                            {% elif row.vor_pct > 0 %}
-                                <td align="right" style="color: green"><b>+{{ row.vor_pct }}</b></td>
-                            {% else %}
-                                <td align="right"><b>{{ row.vor_pct }}</b></td>
-                            {% endif %}
-                            <td align="right">{{ row.adp }}</td>
-                            <td align="center">{{ row.priority }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div> 
-        </div>        
+        </div>         
     </div>     
 {% endblock content %}

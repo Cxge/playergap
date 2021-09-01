@@ -23,10 +23,10 @@ class SettingsForm(FlaskForm):
     
     save_settings = SubmitField('Next')
     
-class PlayerSelectionForm(FlaskForm):
-    selection = SelectField('Select player', validators=[DataRequired()], render_kw={'autofocus':True})
+# class PlayerSelectionForm(FlaskForm):
+#     selection = SelectField('Select player', validators=[DataRequired()], render_kw={'autofocus':True})
     
-    submit_selection = SubmitField('Submit')
+#     submit_selection = SubmitField('Submit')
     
 class BeginForm(FlaskForm):
     begin = SubmitField('BEGIN')
