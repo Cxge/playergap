@@ -162,6 +162,7 @@ def draft():
     next_pick_label = 'Next Pick: ' + lst_picks[session['pick_num'] + next_pick_in[session['pick_num'] - 1] - 1]
     overall_next_pick_label = '#' + str(lst_picks_ov[session['pick_num'] + next_pick_in[session['pick_num'] - 1] - 1]) + ' Overall'
     team_picking_label = str(team_picking[session['pick_num'] - 1])
+    
     return render_template('draft.html', title='Draft', 
                             pick_label=pick_label, 
                             overall_pick_label=overall_pick_label,

@@ -22,11 +22,6 @@ class SettingsForm(FlaskForm):
                          choices=['FantasyFootballCalculator'])
     
     save_settings = SubmitField('Next')
-    
-# class PlayerSelectionForm(FlaskForm):
-#     selection = SelectField('Select player', validators=[DataRequired()], render_kw={'autofocus':True})
-    
-#     submit_selection = SubmitField('Submit')
-    
+       
 class BeginForm(FlaskForm):
     begin = SubmitField('BEGIN')
