@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="content-section">
+            <h5 class="border-bottom font-weight-bold p-2">Draft Results</h5>
+            <div id="teamfilter" class="p-2 d-flex justify-content-center">Team:&nbsp;&nbsp;</div>
+                <table id="resultstable" class="table table-sm table-striped table-hover">
+                    <thead class="">
+                        <tr>
+                            {% for row in cols %}
+                            <th scope="col" class="text-center">{{ row }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Total:&nbsp;&nbsp;&nbsp; <span id="total"></span></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block script %}
+    <script>
+        $(document).ready(function(){     
+                       
+             var resultstable = $('#resultstable').DataTable({
+                  'paging': false,
+                  'info': false,
+                  'sDom': 'ltr',
+                  'ajax': {
+                      'url': '/results_data',
+                      'type': 'GET'
+                  },
+                  'columns': [
+                      {data: 'team'},
+                      {data: 'pick'},
+                      {data: 'overall'},
+                      {data: 'player'},
+                      {data: 'position'},
+                      {data: 'fantasy_points'}
+                      ],
+                   'columnDefs': [
+                        { 'visible': false, targets: [0]},
+                        { className: 'text-center', targets: [4] },
+                        { className: 'text-right', render: DataTable.render.number(',', '.', '1'), targets: [5] }
+                      ],
+                    initComplete: function () {
+                        this.api().columns([0]).every( function () {
+                            var column = this;
+                            var select = $('<select><option value=""></option></select>')
+                                .appendTo('#teamfilter').empty()
+                                .on( 'change', function () {
+                                    var val = $.fn.dataTable.util.escapeRegex(
+                                        $(this).val()
+                                    );
+             
+                                    column
+                                        .search( val ? '^'+val+'$' : '', true, false )
+                                        .draw();
+                                });
+             
+                            column.data().unique().sort(function(a, b){return a-b}).each( function ( d, j ) {
+                                select.append( '<option value="'+d+'">'+d+'</option>' )
+                            });
+                            $(resultstable).ready(function() {
+                                column.search( 1 ? '^'+1+'$' : '', true, false ).draw();
+                            });
+                        });
+                    },
+                    drawCallback: function () {
+                      var sum = $('#resultstable').DataTable().column(5, {filter:'applied'}).data().sum().toFixed(1);
+                      $('#total').html(sum);
+                    }	
+            
+            });   
+        });
+    </script>
+{% endblock script %}

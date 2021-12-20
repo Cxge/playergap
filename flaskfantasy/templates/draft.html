@@ -1,62 +1,72 @@
 {% extends "layout.html" %}
+
 {% block content %}
- 
+    <div class="row">
+        <div class="col-md-12">
+            <div class="content-section">
+                <legend><b>Draft Simulator</b></legend>
+                <div class="card mb-4">
+                    <div class="card-body bg-light">
+                        <p class="card-text"><small><b>Rankings</b> are based on the projected Fantasy Points <b>gap</b> between a player and their probable replacement. Players with high <b>urgency</b> 
+                                                    should be prioritized since it's unlikely they will be available again by the current team's next pick.
+                                             </small>
+                        </p>
+                    </div>
+                </div>
+             </div>   
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-9">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="content-section">
-                        <legend><b>Draft Simulator</b></legend>
-                        <div class="card mb-4">
-                            <div class="card-body bg-light">
-                                <p class="card-text"><small><b>Rankings</b> are based on the projected Fantasy Points <b>gap</b> between a player and his probable replacement. Players with high <b>urgency</b> 
-                                                            should be prioritized since it's unlikely they will be available again by the current team's next pick.
-                                                     </small>
-                                </p>
-                            </div>
-                        </div>
-                     </div>   
-                </div>                    
-                <div class="col-md-12">        
+             <div class="row">
+                 <div class="col-md-12">
                     <div class="content-section table-responsive">
-                        <legend class="border-bottom"><small><b>{{ pick_label }}  -  {{ overall_pick_label }}</b></small></legend>
-                        <table class="table table-sm table-striped table-hover mydatatable">
+                        <h5 id="picklabel" class="border-bottom font-weight-bold p-2">{{ pick_label }}</h5>
+                        <div class="form-check form-check-inline">
+                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" data-val="" checked>
+                          <label class="form-check-label" for="inlineRadio1">All</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" data-val="QB">
+                          <label class="form-check-label" for="inlineRadio2">QB</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" data-val="RB">
+                          <label class="form-check-label" for="inlineRadio3">RB</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" data-val="WR">
+                          <label class="form-check-label" for="inlineRadio4">WR</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
+                          <label class="form-check-label" for="inlineRadio5">TE</label>
+                        </div>
+                        <table id="drafttable" class="table table-sm table-striped table-hover">
+                        <div id="positionfilter" class="p-1">
+                        </div>
                             <thead class="">
                                 <tr>
                                     {% for row in headings1 %}
                                     <th scope="col" class="text-center">{{ row }}</th>
                                     {% endfor %}
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in data1 %}
+                            </thead> 
+                            <tfoot>
                                 <tr>
-                                    <td align="right"><a href="/select/{{ row.player }}" class="btn btn-info btn-sm">Pick</a></td>
-                                    <td align="right"><b>{{ row.rank }}.</b></td>
-                                    <td align="left">{{ row.player }}</td>
-                                    <td align="center">{{ row.position }}</td>
-                                    <td align="right">{{ row.fantasy_points }}</td>
-                                    <td align="right">{{ row.vor_pts }}</td>
-                                    {% if row.vor_pct < 0 %}
-                                        <td align="right" style="color: red"><b>{{ row.vor_pct }}</b></td>
-                                    {% elif row.vor_pct > 0 %}
-                                        <td align="right" style="color: green"><b>+{{ row.vor_pct }}</b></td>
-                                    {% else %}
-                                        <td align="right"><b>{{ row.vor_pct }}</b></td>
-                                    {% endif %}
-                                    <td align="right">{{ row.adp }}</td>
-                                    <td align="center">{{ row.priority }}</td>
+                                    {% for row in headings1 %}
+                                    <th  class="pt-2"></th>
+                                    {% endfor %}
                                 </tr>
-                                {% endfor %}
-                            </tbody>
+                            </tfoot>                         
                         </table>
-                    </div> 
-                </div>
-                <div class="col-md-12">
+                    </div>
+                 </div>
+                 <div class="col-md-12">
                     <div class="content-section">
-                    <legend class="border-bottom"><small><b>{{ next_pick_label }}  -  {{ overall_next_pick_label }}</b></small></legend>
-                        <legend><small>Replacements</small></legend>
-                        <table class="table table-sm table-striped table-hover">
+                    <h5 id="nextpicklabel" class="font-weight-bold">{{ next_pick_label }}</h5>
+                        <h6>Replacements</h6>
+                        <table id="repltable" class="table table-sm table-striped table-hover">
                             <thead class="">
                                 <tr>
                                     {% for row in headings2 %}
@@ -64,27 +74,17 @@
                                     {% endfor %}
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for row in data2 %}
-                                <tr>
-                                    <td align="left">{{ row.player }}</td>
-                                    <td align="center">{{ row.position }}</td>
-                                    <td align="right">{{ row.fantasy_points }}</td>
-                                    <td align="right">{{ row.adp }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
                         </table>
                     </div> 
-                </div>                
-            </div>   
+                 </div>     
+             </div>
         </div>
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-12">
                     <div class="content-section">
-                    <legend class=""><small><b>Roster - Team {{ team_picking_label }}</b></small></legend>
-                        <table class="table table-sm table-hover">
+                    <h5 id="teamlabel" class="font-weight-bold">{{ team_label }}</h5>
+                        <table id="teamtable" class="table table-sm table-hover">
                             <thead class="">
                                 <tr>
                                     {% for row in headings3 %}
@@ -92,18 +92,128 @@
                                     {% endfor %}
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for row in data3 %}
-                                <tr>
-                                    <td align="center">{{ row.position }}</td>
-                                    <td align="left">{{ row.player }}</td> 
-                                </tr>
-                                {% endfor %}
-                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>         
-    </div>     
+    </div>
 {% endblock content %}
+
+{% block script %}
+    <script>
+        $(document).ready(function(){     
+                       
+             var drafttable = $('#drafttable').DataTable({
+                  'scrollY': 415,
+                  'paging': false,
+                  'info': false,
+                  'ajax': {
+                      'url': '/draft_data',
+                      'type': 'GET'
+                  },
+                  'rowCallback': function ( row, data, index ) {
+                        if ( data.vor_pct > 0 ) {
+                        $('td:eq(6)', row).css('color', 'Green');}
+                        else if ( data.vor_pct < 0 ) {
+                        $('td:eq(6)', row).css('color', 'Red');} 
+                  },
+                  'columns': [
+                      {defaultContent: '<button class="btn btn-info btn-sm">Pick</button>'},
+                      {data: 'rank'},
+                      {data: 'player'},
+                      {data: 'position'},
+                      {data: 'fantasy_points'},
+                      {data: 'vor_pts'},
+                      {data: 'vor_pct'},
+                      {data: 'adp'},
+                      {data: 'urgency'}
+                      ],
+                   'columnDefs': [
+                        { className: 'font-weight-bold', targets: [1] },
+                        { className: 'font-weight-bold text-right', targets: [6] },
+                        { className: 'text-right', targets: [4, 5, 6, 7] },
+                        { className: 'text-center', targets: [3, 8] },
+                        { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6, 7]}
+                      ],
+                  'order': [[ 1, 'asc' ]]
+            
+            });
+            
+              $('.search').click(function() {
+                drafttable.column(3).search($(this).data('val')).draw();
+              });         
+            
+             var repltable = $('#repltable').DataTable({
+                  'paging': false,
+                  'searching': false,
+                  'info': false,
+                  'ajax': {
+                      'url': '/repl_data',
+                      'type': 'GET'
+                  },
+                  'columns': [
+                      {data: 'player'},
+                      {data: 'position'},
+                      {data: 'fantasy_points'},
+                      {data: 'adp'}
+                      ],
+                  'columnDefs': [
+                        { className: 'text-right', render: DataTable.render.number(',', '.', '1'), targets: [2, 3] },
+                        { className: 'text-center', targets: [1] }
+                      ],
+                  'order': [[ 1, 'asc' ]]
+            });
+            
+             var teamtable = $('#teamtable').DataTable({
+                  'scrollY': 522,
+                  'paging': false,
+                  'searching': false,
+                  'info': false,
+                  'language': {'emptyTable': 'No players selected'},
+                  'ajax': {
+                      'url': '/team_data',
+                      'type': 'GET'
+                  },
+                  'columns': [
+                      {data: 'position'},
+                      {data: 'player'}
+                      ],
+                  'columnDefs': [
+                        { className: 'text-center', 'width':'30%', targets: [0] }
+                      ]
+            });
+            
+        $('#drafttable tbody').on('click', 'button', function() {
+            var data = drafttable.row($(this).parents('tr')).data();
+            var player = data.player;
+            var position = data.position;
+            var fantasy_points = data.fantasy_points;
+            
+            req = $.ajax({
+                url: '/draft_data',
+                type: 'POST',
+                data: {'player' : player, 'position' : position, 'fantasy_points': fantasy_points}
+            });
+            req.done(function(data) {
+                if (data.pick_num > data.total_picks) {
+                    alert( 'That was the last pick of the draft. Good luck!' );
+                    //window.location.href = "/results";
+                    var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
+                    $("body").append($form);
+                    $form.submit();                    
+                    } else {
+                         drafttable.ajax.reload();
+                         repltable.ajax.reload();
+                         teamtable.ajax.reload();
+                         $('#picklabel').text(data.pick_label);
+                         $('#nextpicklabel').text(data.next_pick_label);
+                         $('#teamlabel').text(data.team_label);
+                     }
+                 });
+
+            });
+            
+        });
+    </script>
+{% endblock script %}
