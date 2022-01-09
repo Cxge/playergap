@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import SelectField, SubmitField, StringField, TextAreaField
+from wtforms.validators import DataRequired, Email
 
 class SettingsForm(FlaskForm):
     scoring_format = SelectField('Scoring format', validators=[DataRequired()],
@@ -25,3 +25,14 @@ class SettingsForm(FlaskForm):
        
 class BeginForm(FlaskForm):
     begin = SubmitField('BEGIN')
+
+class ContactForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    
+    subject = StringField('Subject', validators=[DataRequired()])
+    
+    message = TextAreaField('Message', validators=[DataRequired()])
+    
+    send = SubmitField('SEND')

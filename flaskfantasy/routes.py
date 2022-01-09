@@ -1,11 +1,12 @@
-from flask import render_template, url_for, request, redirect, session, jsonify
-from flaskfantasy import app
-from flaskfantasy.forms import SettingsForm, BeginForm
+from flask import render_template, url_for, request, redirect, session, jsonify, flash
+from flaskfantasy import app, mail
+from flaskfantasy.forms import SettingsForm, BeginForm, ContactForm
 import pandas as pd
 import numpy as np
 import psycopg2
 from psycopg2.extensions import parse_dsn
 import os
+from flask_mail import Message
 
 DATABASE_URL = parse_dsn(os.environ.get('DATABASE_URL'))
 
@@ -16,6 +17,27 @@ def home():
     if form.validate_on_submit():
         return redirect(url_for('settings'))
     return render_template('home.html', form=form)
+
+@app.route("/contact", methods=['GET','POST'])
+def contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        name = request.form['name']
+        email = request.form['email'].lower()
+        subject = request.form['subject']
+        message = request.form['message']
+        msg = Message(subject, recipients=['playergap.app@gmail.com'])
+        msg.body = f"""
+            Name: {name}
+            Email: {email}
+            
+            Message:
+            {message}
+        """
+        mail.send(msg)
+        flash('Your message has been sent!', 'success')
+        return redirect(url_for('home'))
+    return render_template('contact.html', title='Contact', form=form)
 
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
