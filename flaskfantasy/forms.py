@@ -35,4 +35,4 @@ class ContactForm(FlaskForm):
     
     message = TextAreaField('Message', validators=[DataRequired()])
     
-    send = SubmitField('SEND')
+    send = SubmitField('Send')

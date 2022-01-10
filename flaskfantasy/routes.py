@@ -27,13 +27,7 @@ def contact():
         subject = request.form['subject']
         message = request.form['message']
         msg = Message(subject, recipients=['playergap.app@gmail.com'])
-        msg.body = f"""
-            Name: {name}
-            Email: {email}
-            
-            Message:
-            {message}
-        """
+        msg.body = f'{message}\n\n--\n{name}\n{email}'
         mail.send(msg)
         flash('Your message has been sent!', 'success')
         return redirect(url_for('home'))
