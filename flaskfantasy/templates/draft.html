@@ -116,7 +116,7 @@
                   'paging': false,
                   'info': false,
                   'ajax': {
-                      'url': '/draft_data_init',
+                      'url': '/draft_data',
                       'type': 'GET',
                       'dataSrc': 'draftdata'
                   },
@@ -158,7 +158,7 @@
                   'searching': false,
                   'info': false,
                   'ajax': {
-                      'url': '/draft_data_init',
+                      'url': '/draft_data',
                       'type': 'GET',
                       'dataSrc': 'repldata'
                   },
@@ -181,7 +181,7 @@
                   'info': false,
                   'language': {'emptyTable': 'No players selected'},
                   'ajax': {
-                      'url': '/draft_data_init',
+                      'url': '/draft_data',
                       'type': 'GET',
                       'dataSrc': 'teamdata'
                   },
@@ -201,7 +201,7 @@
             var fantasy_points = data.fantasy_points;
             
             req = $.ajax({
-                url: '/pick_undo',
+                url: '/draft_data',
                 type: 'POST',
                 data: {'player' : player, 'position' : position, 'fantasy_points': fantasy_points}
             });
@@ -209,7 +209,7 @@
             $('.pick-btn').attr("disabled", true);
             $('#undo-btn').attr("disabled", true);
             
-            $.getJSON('/draft_data', function(data) {
+            req.done(function(data) {
                 if (data.pick_num > 1) {
                     $('#undo-btn').attr("disabled", false);                   
                     } else {
@@ -221,9 +221,9 @@
                     $("body").append($form);
                     $form.submit();                    
                     } else {
-                         drafttable.ajax.url('/draft_data').load();
-                         repltable.ajax.url('/draft_data').load();
-                         teamtable.ajax.url('/draft_data').load();
+                         drafttable.ajax.reload();
+                         repltable.ajax.reload();
+                         teamtable.ajax.reload();
                          $('#picklabel').text(data.pick_label);
                          $('#nextpicklabel').text(data.next_pick_label);
                          $('#teamlabel').text(data.team_label);
@@ -238,22 +238,22 @@
             
         $('#undo-btn').on('click', function() {            
             req = $.ajax({
-                url: '/pick_undo',
+                url: '/draft_data',
                 type: 'POST'
             });
             
             $('.pick-btn').attr("disabled", true);
             $('#undo-btn').attr("disabled", true);
             
-            $.getJSON('/draft_data', function(data) {
+            req.done(function(data) {
                 if (data.pick_num > 1) {
                     $('#undo-btn').attr("disabled", false);                   
                     } else {
                     $('#undo-btn').attr("disabled", true);
                     };
-                drafttable.ajax.url('/draft_data').load();
-                repltable.ajax.url('/draft_data').load();
-                teamtable.ajax.url('/draft_data').load();
+                drafttable.ajax.reload();
+                repltable.ajax.reload();
+                teamtable.ajax.reload();
                 $('#picklabel').text(data.pick_label);
                 $('#nextpicklabel').text(data.next_pick_label);
                 $('#teamlabel').text(data.team_label);

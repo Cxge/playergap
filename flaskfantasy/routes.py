@@ -160,21 +160,26 @@ def draft():
     else:
         return redirect(url_for('settings'))
 
-
-@app.route("/draft_data_init", methods=['GET'])
-def draft_data_init():
-    pick_num = session['pick_num']
-    next_pick_in = session['next_pick_in']
-    team_picking = session['team_picking']
-    dfDraft = pd.DataFrame.from_dict(session['draft'])     
-    draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in)
-    dfTeam = pd.DataFrame.from_dict(session['roster'])
-    dfTeam = dfTeam.loc[dfTeam.team == team_picking[pick_num - 1]]
-    teamdata = dfTeam.to_dict(orient='records')    
-    return jsonify({'draftdata': draftdata, 'repldata': repldata, 'teamdata': teamdata})
-    
-@app.route("/draft_data", methods=['GET'])
-def draft_data():
+@app.route("/draft_data", methods=['GET', 'POST'])
+def draft_data():  
+    if request.method == 'POST' and 'player' in request.form: 
+        session['pick_num'] += 1   
+        pick_num = session['pick_num']
+        lst_picks = session['lst_picks']
+        team_picking = session['team_picking']
+        player = request.form['player']
+        position = request.form['position']
+        fantasy_points = request.form['fantasy_points']
+        dfRoster = pd.DataFrame.from_dict(session['roster'])
+        dfPlayer = pd.DataFrame([[team_picking[pick_num - 2], pick_num - 1, lst_picks[pick_num - 2], player, position, fantasy_points]], columns=['team', 'overall', 'pick', 'player', 'position', 'fantasy_points'])
+        dfRoster = pd.concat([dfRoster, dfPlayer], ignore_index=True)          
+        session['roster'] = dfRoster.to_dict(orient='records')
+    elif request.method == 'POST' and 'player' not in request.form:
+        session['pick_num'] -= 1
+        dfRoster = pd.DataFrame.from_dict(session['roster'])
+        dfRoster = dfRoster[:-1]         
+        session['roster'] = dfRoster.to_dict(orient='records')        
+    #return ''
     pick_num = session['pick_num']
     lst_picks_ov = session['lst_picks_ov']
     lst_picks = session['lst_picks']
@@ -207,27 +212,6 @@ def draft_data():
                     'prev_team_label': prev_team_label,
                     'prev_player_label': prev_player_label,
                     'prev_pos_label': prev_pos_label})
-    
-@app.route("/pick_undo", methods=['POST'])
-def pick_undo():  
-    if 'player' in request.form:
-        session['pick_num'] += 1   
-        pick_num = session['pick_num']
-        lst_picks = session['lst_picks']
-        team_picking = session['team_picking']
-        player = request.form['player']
-        position = request.form['position']
-        fantasy_points = request.form['fantasy_points']
-        dfRoster = pd.DataFrame.from_dict(session['roster'])
-        dfPlayer = pd.DataFrame([[team_picking[pick_num - 2], pick_num - 1, lst_picks[pick_num - 2], player, position, fantasy_points]], columns=['team', 'overall', 'pick', 'player', 'position', 'fantasy_points'])
-        dfRoster = pd.concat([dfRoster, dfPlayer], ignore_index=True)          
-        session['roster'] = dfRoster.to_dict(orient='records')
-    else:
-        session['pick_num'] -= 1
-        dfRoster = pd.DataFrame.from_dict(session['roster'])
-        dfRoster = dfRoster[:-1]         
-        session['roster'] = dfRoster.to_dict(orient='records')        
-    return ''
 
 @app.route("/results", methods=['GET', 'POST'])
 def results():
