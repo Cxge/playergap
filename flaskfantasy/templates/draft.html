@@ -17,86 +17,93 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-9">
-             <div class="row">
-                 <div class="col-md-12">
-                    <div class="content-section table-responsive">
-                        <h5 id="picklabel" class="border-bottom font-weight-bold p-2">{{ pick_label }}</h5>
-                        <div class="form-check form-check-inline">
-                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" data-val="" checked>
-                          <label class="form-check-label" for="inlineRadio1">All</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" data-val="QB">
-                          <label class="form-check-label" for="inlineRadio2">QB</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" data-val="RB">
-                          <label class="form-check-label" for="inlineRadio3">RB</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" data-val="WR">
-                          <label class="form-check-label" for="inlineRadio4">WR</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                          <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
-                          <label class="form-check-label" for="inlineRadio5">TE</label>
-                        </div>
-                        <table id="drafttable" class="table table-sm table-striped table-hover">
-                        <div id="positionfilter" class="p-1">
-                        </div>
-                            <thead class="">
-                                <tr>
-                                    {% for row in headings1 %}
-                                    <th scope="col" class="text-center">{{ row }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead> 
-                            <tfoot>
-                                <tr>
-                                    {% for row in headings1 %}
-                                    <th  class="pt-2"></th>
-                                    {% endfor %}
-                                </tr>
-                            </tfoot>                         
-                        </table>
-                    </div>
-                 </div>
-                 <div class="col-md-12">
-                    <div class="content-section">
-                    <h5 id="nextpicklabel" class="font-weight-bold">{{ next_pick_label }}</h5>
-                        <h6>Projected Replacements</h6>
-                        <table id="repltable" class="table table-sm table-striped table-hover">
-                            <thead class="">
-                                <tr>
-                                    {% for row in headings2 %}
-                                    <th scope="col" class="text-center">{{ row }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                        </table>
-                    </div> 
-                 </div>     
-             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="content-section">
-                    <h5 id="teamlabel" class="font-weight-bold">{{ team_label }}</h5>
-                        <table id="teamtable" class="table table-sm table-hover">
-                            <thead class="">
-                                <tr>
-                                    {% for row in headings3 %}
-                                    <th scope="col" class="text-center">{{ row }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
+        <div class="col-md-9 mb-3">
+            <div class="content-section table-responsive h-100">
+                <h5 id="picklabel" class="border-bottom font-weight-bold p-2">{{ pick_label }}</h5>
+                <div class="form-check form-check-inline">
+                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" data-val="" checked>
+                  <label class="form-check-label" for="inlineRadio1">All</label>
                 </div>
+                <div class="form-check form-check-inline">
+                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" data-val="QB">
+                  <label class="form-check-label" for="inlineRadio2">QB</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" data-val="RB">
+                  <label class="form-check-label" for="inlineRadio3">RB</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" data-val="WR">
+                  <label class="form-check-label" for="inlineRadio4">WR</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
+                  <label class="form-check-label" for="inlineRadio5">TE</label>
+                </div>
+                <table id="drafttable" class="table table-sm table-striped table-hover">
+                <div id="positionfilter" class="p-1">
+                </div>
+                    <thead class="">
+                        <tr>
+                            {% for row in headings1 %}
+                            <th scope="col" class="text-center">{{ row }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead> 
+                    <tfoot>
+                        <tr>
+                            {% for row in headings1 %}
+                            <th  class="pt-2"></th>
+                            {% endfor %}
+                        </tr>
+                    </tfoot>                         
+                </table>
             </div>
-        </div>         
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="content-section h-100">
+            <h5 id="teamlabel" class="font-weight-bold mb-3">{{ team_label }}</h5>
+                <table id="teamtable" class="table table-sm table-hover">
+                    <thead class="">
+                        <tr>
+                            {% for row in headings3 %}
+                            <th scope="col" class="text-center">{{ row }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                </table>
+            </div>            
+        </div>      
+    </div>
+    <div class="row"> 
+        <div class="col-md-9 mb-3">
+           <div class="content-section h-100">
+               <h5 id="nextpicklabel" class="font-weight-bold">{{ next_pick_label }}</h5>
+               <h6>Projected Replacements</h6>
+               <table id="repltable" class="table table-sm table-striped table-hover">
+                   <thead class="">
+                       <tr>
+                           {% for row in headings2 %}
+                           <th scope="col" class="text-center">{{ row }}</th>
+                           {% endfor %}
+                       </tr>
+                   </thead>
+               </table>
+           </div> 
+        </div> 
+        <div class="col-md-3 mb-3">
+            <div class="content-section h-100">
+                <h5 id="prevpicklabel" class="font-weight-bold">{{ prev_pick_label }}</h5>
+                <h6 id="prevteamlabel" class="border-bottom pb-2">{{ prev_team_label }}</h6>
+                <div class="d-flex align-items-center flex-column justify-content-center h-75 m-auto">
+                    <p id="prevplayerlabel">{{ prev_player_label }}</p>
+                    <p id="prevposlabel">{{ prev_pos_label }}</p>
+                    <div>
+                        <button id="undo-btn" class="btn btn-secondary" disabled>Undo</button>
+                    </div>
+                </div> 
+            </div>        
+        </div>
     </div>
 {% endblock content %}
 
@@ -105,12 +112,13 @@
         $(document).ready(function(){     
                        
              var drafttable = $('#drafttable').DataTable({
-                  'scrollY': 415,
+                  'scrollY': 380,
                   'paging': false,
                   'info': false,
                   'ajax': {
-                      'url': '/draft_data',
-                      'type': 'GET'
+                      'url': '/draft_data_init',
+                      'type': 'GET',
+                      'dataSrc': 'draftdata'
                   },
                   'rowCallback': function ( row, data, index ) {
                         if ( data.vor_pct > 0 ) {
@@ -119,7 +127,7 @@
                         $('td:eq(6)', row).css('color', 'Red');} 
                   },
                   'columns': [
-                      {defaultContent: '<button class="btn btn-info btn-sm"><b>+</b></button>'},
+                      {defaultContent: '<button class="btn btn-info btn-sm pick-btn" style="padding: 2px 8px;"><b>+</b></button>'},
                       {data: 'rank'},
                       {data: 'player'},
                       {data: 'position'},
@@ -130,6 +138,7 @@
                       {data: 'urgency'}
                       ],
                    'columnDefs': [
+                        { orderable: false, targets: [0] },
                         { className: 'font-weight-bold', targets: [1] },
                         { className: 'font-weight-bold text-right', targets: [6] },
                         { className: 'text-right', targets: [4, 5, 6, 7] },
@@ -149,8 +158,9 @@
                   'searching': false,
                   'info': false,
                   'ajax': {
-                      'url': '/repl_data',
-                      'type': 'GET'
+                      'url': '/draft_data_init',
+                      'type': 'GET',
+                      'dataSrc': 'repldata'
                   },
                   'columns': [
                       {data: 'player'},
@@ -166,14 +176,14 @@
             });
             
              var teamtable = $('#teamtable').DataTable({
-                  'scrollY': 522,
                   'paging': false,
                   'searching': false,
                   'info': false,
                   'language': {'emptyTable': 'No players selected'},
                   'ajax': {
-                      'url': '/team_data',
-                      'type': 'GET'
+                      'url': '/draft_data_init',
+                      'type': 'GET',
+                      'dataSrc': 'teamdata'
                   },
                   'columns': [
                       {data: 'position'},
@@ -184,32 +194,73 @@
                       ]
             });
             
-        $('#drafttable tbody').on('click', 'button', function() {
+        $('#drafttable tbody').on('click', '.pick-btn', function() {
             var data = drafttable.row($(this).parents('tr')).data();
             var player = data.player;
             var position = data.position;
             var fantasy_points = data.fantasy_points;
             
             req = $.ajax({
-                url: '/draft_data',
+                url: '/pick_undo',
                 type: 'POST',
                 data: {'player' : player, 'position' : position, 'fantasy_points': fantasy_points}
             });
-            req.done(function(data) {
+            
+            $('.pick-btn').attr("disabled", true);
+            $('#undo-btn').attr("disabled", true);
+            
+            $.getJSON('/draft_data', function(data) {
+                if (data.pick_num > 1) {
+                    $('#undo-btn').attr("disabled", false);                   
+                    } else {
+                    $('#undo-btn').attr("disabled", true);
+                    };
                 if (data.pick_num > data.total_picks) {
                     alert( 'That was the last pick of the draft. Good luck!' );
-                    //window.location.href = "/results";
                     var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
                     $("body").append($form);
                     $form.submit();                    
                     } else {
-                         drafttable.ajax.reload();
-                         repltable.ajax.reload();
-                         teamtable.ajax.reload();
+                         drafttable.ajax.url('/draft_data').load();
+                         repltable.ajax.url('/draft_data').load();
+                         teamtable.ajax.url('/draft_data').load();
                          $('#picklabel').text(data.pick_label);
                          $('#nextpicklabel').text(data.next_pick_label);
                          $('#teamlabel').text(data.team_label);
-                     }
+                         $('#prevpicklabel').text(data.prev_pick_label);
+                         $('#prevteamlabel').text(data.prev_team_label);
+                         $('#prevplayerlabel').text(data.prev_player_label);
+                         $('#prevposlabel').text(data.prev_pos_label);
+                     };
+                 });
+
+            });
+            
+        $('#undo-btn').on('click', function() {            
+            req = $.ajax({
+                url: '/pick_undo',
+                type: 'POST'
+            });
+            
+            $('.pick-btn').attr("disabled", true);
+            $('#undo-btn').attr("disabled", true);
+            
+            $.getJSON('/draft_data', function(data) {
+                if (data.pick_num > 1) {
+                    $('#undo-btn').attr("disabled", false);                   
+                    } else {
+                    $('#undo-btn').attr("disabled", true);
+                    };
+                drafttable.ajax.url('/draft_data').load();
+                repltable.ajax.url('/draft_data').load();
+                teamtable.ajax.url('/draft_data').load();
+                $('#picklabel').text(data.pick_label);
+                $('#nextpicklabel').text(data.next_pick_label);
+                $('#teamlabel').text(data.team_label);
+                $('#prevpicklabel').text(data.prev_pick_label);
+                $('#prevteamlabel').text(data.prev_team_label);
+                $('#prevplayerlabel').text(data.prev_player_label);
+                $('#prevposlabel').text(data.prev_pos_label);
                  });
 
             });

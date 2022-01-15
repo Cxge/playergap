@@ -10,6 +10,21 @@ from flask_mail import Message
 
 DATABASE_URL = parse_dsn(os.environ.get('DATABASE_URL'))
 
+def ranking(dfDraft, pick_num, next_pick_in):
+    dfTopPlayersNextRd = dfDraft.sort_values('adp')
+    dfTopPlayersNextRd = dfTopPlayersNextRd.tail(len(dfTopPlayersNextRd) - next_pick_in[pick_num - 1])
+    dfTopPlayersNextRd = dfTopPlayersNextRd.groupby('position').head(1)[['player', 'position', 'adp', 'fantasy_points']]
+    dict_pos = dict(zip(dfTopPlayersNextRd['position'], dfTopPlayersNextRd['fantasy_points']))
+    dfDraft['vor_pts'] = dfDraft.apply(lambda row: row['fantasy_points'] - (dict_pos.get(row['position'])), axis=1).round(1)
+    dfDraft['vor_pct'] = dfDraft.apply(lambda row: (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
+    dfDraft['rank'] = dfDraft['vor_pct'].rank(method='first', ascending=False)
+    dfDraft['rank'] = dfDraft['rank'].astype(int)
+    dfTopPlayersAvail = dfDraft.sort_values(by='rank', ascending=True)[['rank', 'player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
+    dfTopPlayersAvail['urgency'] = np.where(dfTopPlayersAvail['adp'] >= pick_num + next_pick_in[pick_num - 1], 'Low', 'High')
+    draftdata = dfTopPlayersAvail[['rank', 'player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'urgency']].to_dict(orient='records')
+    repldata = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')   
+    return draftdata, repldata
+
 @app.route("/", methods=['GET','POST'])
 @app.route("/home", methods=['GET','POST'])
 def home():
@@ -117,99 +132,102 @@ def draft():
 
         dfDraft['fantasy_points'] =  dfDraft['fantasy_points'].astype(float).round(1)
         dfDraft['adp'] =  dfDraft['adp'].astype(float).fillna(999)
-        
-        dfTopPlayersNextRd = dfDraft.sort_values('adp')
-        dfTopPlayersNextRd = dfTopPlayersNextRd.tail(len(dfTopPlayersNextRd) - next_pick_in[pick_num - 1])
-        #AGREGAR QB DE A MENTIS CON CERO PUNTOS?
-        dfTopPlayersNextRd = dfTopPlayersNextRd.groupby('position').head(1)[['player', 'position', 'adp', 'fantasy_points']]
-        dict_pos = dict(zip(dfTopPlayersNextRd['position'], dfTopPlayersNextRd['fantasy_points']))
-        dfDraft['vor_pts'] = dfDraft.apply(lambda row: row['fantasy_points'] - (dict_pos.get(row['position'])), axis=1).round(1)
-        dfDraft['vor_pct'] = dfDraft.apply(lambda row: (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
-        dfDraft['rank'] = dfDraft['vor_pct'].rank(method='first', ascending=False)
-        dfDraft['rank'] = dfDraft['rank'].astype(int)
-        dfTopPlayersAvail = dfDraft.sort_values(by='rank', ascending=True)[['rank', 'player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
-        dfTopPlayersAvail['urgency'] = np.where(dfTopPlayersAvail['adp'] >= pick_num + next_pick_in[pick_num - 1], 'Low', 'High')
-        dfTopPlayersAvailDict = dfTopPlayersAvail[['rank', 'player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'urgency']].to_dict(orient='records')
+        draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in)
         Cols1 = ['', 'Rk', 'Player', 'Pos', 'FPts', 'Gap', '%', 'ADP', 'Urgency']
-        dfTopPlayersNextRdDict = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')
         Cols2 = ['Player', 'Pos', 'FPts', 'ADP']
         Cols3 = ['Pos', 'Player']
-        
         pick_label = 'Current Pick: ' + lst_picks[pick_num - 1] + ' - #' + str(pick_num) + ' Overall'
-        next_pick_label = 'Next Pick: ' + lst_picks[pick_num + next_pick_in[pick_num - 1] - 1] + ' - #' + str(lst_picks_ov[pick_num + next_pick_in[pick_num - 1] - 1]) + ' Overall'
         team_label = 'Team ' + str(team_picking[pick_num - 1])
-        session['draft'] = dfTopPlayersAvailDict
-        session['replacements'] = dfTopPlayersNextRdDict    
+        next_pick_label = 'Next Pick: ' + lst_picks[pick_num + next_pick_in[pick_num - 1] - 1] + ' - #' + str(lst_picks_ov[pick_num + next_pick_in[pick_num - 1] - 1]) + ' Overall'
+        prev_pick_label = 'Latest Pick: 0.0'
+        prev_team_label = 'Made By: Team 0'
+        prev_player_label = 'Player'
+        prev_pos_label = 'Position'
+        session['draft'] = draftdata   
         session['roster'] = dfRoster.to_dict(orient='records')
         session['total_picks'] = (roster_size - 2) * num_teams
         return render_template('draft.html', title='Draft', 
                                 pick_label=pick_label, 
+                                team_label=team_label,
                                 next_pick_label=next_pick_label,
+                                prev_pick_label=prev_pick_label,
+                                prev_team_label=prev_team_label,
+                                prev_player_label=prev_player_label,
+                                prev_pos_label=prev_pos_label,
                                 headings1=Cols1,
                                 headings2=Cols2, 
-                                team_label=team_label,
                                 headings3=Cols3)
     else:
         return redirect(url_for('settings'))
 
-@app.route("/draft_data", methods=['GET', 'POST'])
+
+@app.route("/draft_data_init", methods=['GET'])
+def draft_data_init():
+    pick_num = session['pick_num']
+    next_pick_in = session['next_pick_in']
+    team_picking = session['team_picking']
+    dfDraft = pd.DataFrame.from_dict(session['draft'])     
+    draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in)
+    dfTeam = pd.DataFrame.from_dict(session['roster'])
+    dfTeam = dfTeam.loc[dfTeam.team == team_picking[pick_num - 1]]
+    teamdata = dfTeam.to_dict(orient='records')    
+    return jsonify({'draftdata': draftdata, 'repldata': repldata, 'teamdata': teamdata})
+    
+@app.route("/draft_data", methods=['GET'])
 def draft_data():
-    if request.method == "POST":
-        session['pick_num'] += 1
+    pick_num = session['pick_num']
+    lst_picks_ov = session['lst_picks_ov']
+    lst_picks = session['lst_picks']
+    next_pick_in = session['next_pick_in']
+    team_picking = session['team_picking']
+    total_picks = session['total_picks']
+    dfDraft = pd.DataFrame.from_dict(session['draft'])
+    dfRoster = pd.DataFrame.from_dict(session['roster'])
+    dfDraft = dfDraft.loc[~dfDraft['player'].isin(dfRoster['player'])]
+    draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in)
+    dfTeam = pd.DataFrame.from_dict(session['roster'])
+    dfTeam = dfTeam.loc[dfTeam.team == team_picking[pick_num - 1]]
+    teamdata = dfTeam.to_dict(orient='records')    
+    team_label = 'Team ' + str(team_picking[pick_num - 1])
+    pick_label = 'Current Pick: ' + lst_picks[pick_num - 1] + ' - #' + str(pick_num) + ' Overall'
+    next_pick_label = 'Next Pick: ' + lst_picks[pick_num + next_pick_in[pick_num - 1] - 1] + ' - #' + str(lst_picks_ov[pick_num + next_pick_in[pick_num - 1] - 1]) + ' Overall'  
+    prev_pick_label = 'Latest Pick: ' + (lst_picks[pick_num - 2] if pick_num > 1 else '0.0')
+    prev_team_label = 'Made By: Team ' + (str(team_picking[pick_num - 2]) if pick_num > 1 else '0')
+    prev_player_label = str(dfRoster.iloc[-1].at['player']) if pick_num > 1 else 'Player'
+    prev_pos_label = str(dfRoster.iloc[-1].at['position']) if pick_num > 1 else 'Position'
+    return jsonify({'draftdata': draftdata,
+                    'repldata': repldata,
+                    'teamdata': teamdata,
+                    'pick_label': pick_label,
+                    'next_pick_label': next_pick_label,
+                    'team_label': team_label,
+                    'pick_num': pick_num,
+                    'total_picks': total_picks,
+                    'prev_pick_label': prev_pick_label,
+                    'prev_team_label': prev_team_label,
+                    'prev_player_label': prev_player_label,
+                    'prev_pos_label': prev_pos_label})
+    
+@app.route("/pick_undo", methods=['POST'])
+def pick_undo():  
+    if 'player' in request.form:
+        session['pick_num'] += 1   
         pick_num = session['pick_num']
-        lst_picks_ov = session['lst_picks_ov']
         lst_picks = session['lst_picks']
-        next_pick_in = session['next_pick_in']
         team_picking = session['team_picking']
-        total_picks = session['total_picks']
-        
         player = request.form['player']
         position = request.form['position']
         fantasy_points = request.form['fantasy_points']
-        dfDraft = pd.DataFrame.from_dict(session['draft'])
-        dfDraft.drop(dfDraft[dfDraft['player'] == player].index, inplace=True)
-        
-        dfTopPlayersNextRd = dfDraft.sort_values('adp')
-        dfTopPlayersNextRd = dfTopPlayersNextRd.tail(len(dfTopPlayersNextRd) - next_pick_in[pick_num - 1])
-        
-        dfTopPlayersNextRd = dfTopPlayersNextRd.groupby('position').head(1)[['player', 'position', 'adp', 'fantasy_points']]
-        dict_pos = dict(zip(dfTopPlayersNextRd['position'], dfTopPlayersNextRd['fantasy_points']))
-        dfDraft['vor_pts'] = dfDraft.apply(lambda row: row['fantasy_points'] - (dict_pos.get(row['position'])), axis=1).round(1)
-        dfDraft['vor_pct'] = dfDraft.apply(lambda row: (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
-        dfDraft['rank'] = dfDraft['vor_pct'].rank(method='first', ascending=False)
-        dfDraft['rank'] = dfDraft['rank'].astype(int)
-        dfTopPlayersAvail = dfDraft.sort_values(by='rank', ascending=True)[['rank', 'player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
-        dfTopPlayersAvail['urgency'] = np.where(dfTopPlayersAvail['adp'] >= pick_num + next_pick_in[pick_num - 1], 'Low', 'High')
-        dfTopPlayersAvailDict = dfTopPlayersAvail[['rank', 'player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'urgency']].to_dict(orient='records')
-        dfTopPlayersNextRdDict = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')
-        session['draft'] = dfTopPlayersAvailDict
-        session['replacements'] = dfTopPlayersNextRdDict        
         dfRoster = pd.DataFrame.from_dict(session['roster'])
         dfPlayer = pd.DataFrame([[team_picking[pick_num - 2], pick_num - 1, lst_picks[pick_num - 2], player, position, fantasy_points]], columns=['team', 'overall', 'pick', 'player', 'position', 'fantasy_points'])
-        dfRoster = pd.concat([dfRoster, dfPlayer], ignore_index=True)
+        dfRoster = pd.concat([dfRoster, dfPlayer], ignore_index=True)          
         session['roster'] = dfRoster.to_dict(orient='records')
-        draftdata = session['draft']
-        team_label = 'Team ' + str(team_picking[pick_num - 1])
-        pick_label = 'Current Pick: ' + lst_picks[pick_num - 1] + ' - #' + str(pick_num) + ' Overall'
-        next_pick_label = 'Next Pick: ' + lst_picks[pick_num + next_pick_in[pick_num - 1] - 1] + ' - #' + str(lst_picks_ov[pick_num + next_pick_in[pick_num - 1] - 1]) + ' Overall'  
-        return jsonify({'data': draftdata, 'pick_label': pick_label, 'next_pick_label': next_pick_label, 'team_label': team_label, 'pick_num': pick_num, 'total_picks': total_picks})
     else:
-        data = session['draft']
-        return jsonify({'data': data})
-    
-@app.route("/repl_data", methods=['GET'])
-def repl_data():
-    repldata = session['replacements']
-    return jsonify({'data' : repldata})
-
-@app.route("/team_data", methods=['GET'])
-def team_data():
-    pick_num = session['pick_num']
-    team_picking = session['team_picking']
-    dfTeam = pd.DataFrame.from_dict(session['roster'])
-    dfTeam = dfTeam.loc[dfTeam.team == team_picking[pick_num - 1]]
-    teamdata = dfTeam.to_dict(orient='records')
-    return jsonify({'data' : teamdata})
+        session['pick_num'] -= 1
+        dfRoster = pd.DataFrame.from_dict(session['roster'])
+        dfRoster = dfRoster[:-1]         
+        session['roster'] = dfRoster.to_dict(orient='records')        
+    return ''
 
 @app.route("/results", methods=['GET', 'POST'])
 def results():
