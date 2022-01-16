@@ -65,7 +65,7 @@ def draft():
         projections_source = request.form['projections_source']
         adp_source = request.form['adp_source']
         pick_num = 1
-        dfRoster = pd.DataFrame(data=[['', '', '', '', '', '']], columns=['team', 'overall', 'pick', 'player', 'position', 'fantasy_points'])
+        dfRoster = pd.DataFrame(data=[['', '', '', '', '']], columns=['team', 'pick', 'player', 'position', 'fantasy_points'])
     
         lst_picks_ov = []
         lst_picks_ov = [*range(1, roster_size * num_teams + 1)]
@@ -171,7 +171,7 @@ def draft_data():
         position = request.form['position']
         fantasy_points = request.form['fantasy_points']
         dfRoster = pd.DataFrame.from_dict(session['roster'])
-        dfPlayer = pd.DataFrame([[team_picking[pick_num - 2], pick_num - 1, lst_picks[pick_num - 2], player, position, fantasy_points]], columns=['team', 'overall', 'pick', 'player', 'position', 'fantasy_points'])
+        dfPlayer = pd.DataFrame([[team_picking[pick_num - 2], lst_picks[pick_num - 2], player, position, fantasy_points]], columns=['team', 'pick', 'player', 'position', 'fantasy_points'])
         dfRoster = pd.concat([dfRoster, dfPlayer], ignore_index=True)          
         session['roster'] = dfRoster.to_dict(orient='records')
     elif request.method == 'POST' and 'player' not in request.form:
@@ -216,7 +216,7 @@ def draft_data():
 @app.route("/results", methods=['GET', 'POST'])
 def results():
     if request.method == "POST":
-        cols = ['Team', 'Pick', 'Overall', 'Player', 'Position', 'Fantasy Pts']
+        cols = ['Team', 'Pick', 'Player', 'Position', 'Fantasy Pts']
         return render_template('results.html', cols=cols)
     else:
         return redirect(url_for('settings'))

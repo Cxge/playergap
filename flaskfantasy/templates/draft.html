@@ -18,7 +18,7 @@
     </div>
     <div class="row">
         <div class="col-md-9 mb-3">
-            <div class="content-section table-responsive h-100">
+            <div class="content-section h-100">
                 <h5 id="picklabel" class="border-bottom font-weight-bold p-2">{{ pick_label }}</h5>
                 <div class="form-check form-check-inline">
                   <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" data-val="" checked>
@@ -40,7 +40,7 @@
                   <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
                   <label class="form-check-label" for="inlineRadio5">TE</label>
                 </div>
-                <table id="drafttable" class="table table-sm table-striped table-hover">
+                <table id="drafttable" class="table table-striped table-hover display compact">
                 <div id="positionfilter" class="p-1">
                 </div>
                     <thead class="">
@@ -63,7 +63,7 @@
         <div class="col-md-3 mb-3">
             <div class="content-section h-100">
             <h5 id="teamlabel" class="font-weight-bold mb-3">{{ team_label }}</h5>
-                <table id="teamtable" class="table table-sm table-hover">
+                <table id="teamtable" class="table table-hover display compact" style="width:100%">
                     <thead class="">
                         <tr>
                             {% for row in headings3 %}
@@ -80,7 +80,7 @@
            <div class="content-section h-100">
                <h5 id="nextpicklabel" class="font-weight-bold">{{ next_pick_label }}</h5>
                <h6>Projected Replacements</h6>
-               <table id="repltable" class="table table-sm table-striped table-hover">
+               <table id="repltable" class="table table-striped table-hover display compact" style="width:100%">
                    <thead class="">
                        <tr>
                            {% for row in headings2 %}
@@ -95,8 +95,8 @@
             <div class="content-section h-100">
                 <h5 id="prevpicklabel" class="font-weight-bold">{{ prev_pick_label }}</h5>
                 <h6 id="prevteamlabel" class="border-bottom pb-2">{{ prev_team_label }}</h6>
-                <div class="d-flex align-items-center flex-column justify-content-center h-75 m-auto">
-                    <p id="prevplayerlabel">{{ prev_player_label }}</p>
+                <div class="d-flex align-items-center flex-column justify-content-center m-auto">
+                    <br><p id="prevplayerlabel">{{ prev_player_label }}</p>
                     <p id="prevposlabel">{{ prev_pos_label }}</p>
                     <div>
                         <button id="undo-btn" class="btn btn-secondary" disabled>Undo</button>
@@ -112,7 +112,7 @@
         $(document).ready(function(){     
                        
              var drafttable = $('#drafttable').DataTable({
-                  'scrollY': 380,
+                  'scrollY': 365,
                   'paging': false,
                   'info': false,
                   'responsive': {
@@ -144,14 +144,13 @@
                       {data: 'urgency'}
                       ],
                    'columnDefs': [
-                        { orderable: false, targets: [0] },
-                        { className: 'font-weight-bold', targets: [1, 6] },
-                        //{ className: 'font-weight-bold text-right', targets: [6] },
-                        //{ className: 'text-right', targets: [4, 5, 6, 7] },
-                        //{ className: 'text-center', targets: [3, 8] },
+                        { orderable: false, targets: 0 },
+                        { className: 'font-weight-bold', targets: 6 },
                         { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6, 7]},
-                        { responsivePriority: 1, targets: [0, 2, 3, 6, 8]}
-                        //{ className: 'dtr-control', targets: [2]}
+                        { responsivePriority: 1, targets: [0, 2, 3, 5, 6]},
+                        { responsivePriority: 2, targets: 8 },
+                        { responsivePriority: 3, targets: 4 },
+                        { responsivePriority: 4, targets: 7 }
                       ],
                   'order': [[ 1, 'asc' ]]
             
@@ -165,6 +164,7 @@
                   'paging': false,
                   'searching': false,
                   'info': false,
+                  'responsive': true,
                   'ajax': {
                       'url': '/draft_data',
                       'type': 'GET',
@@ -177,8 +177,7 @@
                       {data: 'adp'}
                       ],
                   'columnDefs': [
-                        { className: 'text-right', render: DataTable.render.number(',', '.', '1'), targets: [2, 3] },
-                        { className: 'text-center', targets: [1] }
+                        { render: DataTable.render.number(',', '.', '1'), targets: [2, 3] }
                       ],
                   'order': [[ 1, 'asc' ]]
             });
@@ -187,6 +186,7 @@
                   'paging': false,
                   'searching': false,
                   'info': false,
+                  'responsive': true,
                   'language': {'emptyTable': 'No players selected'},
                   'ajax': {
                       'url': '/draft_data',
@@ -198,7 +198,8 @@
                       {data: 'player'}
                       ],
                   'columnDefs': [
-                        { className: 'text-center', 'width':'30%', targets: [0] }
+                        {'width':'30%', targets: 0},
+                        { responsivePriority: 1, targets: 1 }
                       ]
             });
             
@@ -223,7 +224,7 @@
                     } else {
                     $('#undo-btn').attr("disabled", true);
                     };
-                if (data.pick_num > data.total_picks) {
+                if (data.pick_num > 14) {
                     alert( 'That was the last pick of the draft. Good luck!' );
                     var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
                     $("body").append($form);
