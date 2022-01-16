@@ -224,7 +224,7 @@
                     } else {
                     $('#undo-btn').attr("disabled", true);
                     };
-                if (data.pick_num > 14) {
+                if (data.pick_num > data.total_picks) {
                     alert( 'That was the last pick of the draft. Good luck!' );
                     var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
                     $("body").append($form);
