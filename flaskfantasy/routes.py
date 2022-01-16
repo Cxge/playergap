@@ -216,7 +216,7 @@ def draft_data():
 @app.route("/results", methods=['GET', 'POST'])
 def results():
     if request.method == "POST":
-        cols = ['Team', 'Pick', 'Player', 'Position', 'Fantasy Pts']
+        cols = ['Team', 'Pick', 'Player', 'Pos', 'FPts']
         return render_template('results.html', cols=cols)
     else:
         return redirect(url_for('settings'))
