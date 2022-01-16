@@ -113,10 +113,14 @@
                        
              var drafttable = $('#drafttable').DataTable({
                   'scrollY': 380,
-                  'scrollX': true,
                   'paging': false,
                   'info': false,
-                  'responsive': true,
+                  'responsive': {
+                      'details': {
+                          type: 'column',
+                          target: -1
+                      }
+                  },
                   'ajax': {
                       'url': '/draft_data',
                       'type': 'GET',
@@ -145,7 +149,8 @@
                         { className: 'font-weight-bold text-right', targets: [6] },
                         { className: 'text-right', targets: [4, 5, 6, 7] },
                         { className: 'text-center', targets: [3, 8] },
-                        { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6, 7]}
+                        { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6, 7]},
+                        { responsivePriority: 1, targets: [0, 1, 2, 3, 6]}
                       ],
                   'order': [[ 1, 'asc' ]]
             
