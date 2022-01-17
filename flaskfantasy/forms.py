@@ -11,7 +11,7 @@ class SettingsForm(FlaskForm):
                              choices=[8, 10, 12, 14, 16],
                              default=12)
     
-    roster_size = SelectField('Roster size', validators=[DataRequired()],
+    roster_size = SelectField('Roster size (including bench)', validators=[DataRequired()],
                               choices=[13, 14, 15, 16],
                               default=15)
     
