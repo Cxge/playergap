@@ -133,7 +133,7 @@ def draft():
         dfDraft['fantasy_points'] =  dfDraft['fantasy_points'].astype(float).round(1)
         dfDraft['adp'] =  dfDraft['adp'].astype(float).fillna(999)
         draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in)
-        Cols1 = ['', 'Rk', 'Player', 'Pos', 'FPts', 'Gap', '%', 'ADP', 'Urgency']
+        Cols1 = ['', 'Rk', 'Player', 'Pos', 'FPts', 'Gap', 'Gap %', 'ADP', 'Urgency']
         Cols2 = ['Player', 'Pos', 'FPts', 'ADP']
         Cols3 = ['Pos', 'Player']
         pick_label = 'Current Pick: ' + lst_picks[pick_num - 1] + ' - #' + str(pick_num) + ' Overall'

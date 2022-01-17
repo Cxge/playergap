@@ -46,7 +46,7 @@
                     <thead class="">
                         <tr>
                             {% for row in headings1 %}
-                            <th scope="col" class="text-center">{{ row }}</th>
+                            <th scope="col" class="text-center" style="white-space: nowrap">{{ row }}</th>
                             {% endfor %}
                             <th></th>
                         </tr>
@@ -142,8 +142,8 @@
                         { orderable: false, targets: 0 },
                         { className: 'font-weight-bold', targets: 6 },
                         { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6, 7]},
-                        { responsivePriority: 1, targets: [0, 2, 3, 5, 6]},
-                        { responsivePriority: 2, targets: 8 },
+                        { responsivePriority: 1, targets: [0, 2, 3, 6, 8]},
+                        { responsivePriority: 2, targets: 5 },
                         { responsivePriority: 3, targets: 4 },
                         { responsivePriority: 4, targets: 7 },
                         { className: 'dtr-control', orderable: false, targets: -1 }
