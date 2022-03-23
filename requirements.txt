@@ -12,3 +12,4 @@ Flask-WTF==1.0.0
 redis==3.5.3
 Jinja2==3.0.3
 gunicorn==20.1.0
+itsdangerous==2.0.1
