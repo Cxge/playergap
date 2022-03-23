@@ -2,30 +2,38 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, StringField, TextAreaField
 from wtforms.validators import DataRequired, Email
 
+
 class SettingsForm(FlaskForm):
-    system = SelectField('System', validators=[DataRequired()],
-                                 choices=['1-QB', '2-QB', 'Dynasty', 'Rookie'],
-                                 default='1-QB')
+    system = SelectField('System',
+                         validators=[DataRequired()],
+                         choices=['1-QB', '2-QB', 'Dynasty', 'Rookie'],
+                         default='1-QB')
     
-    scoring_format = SelectField('Scoring format', validators=[DataRequired()],
+    scoring_format = SelectField('Scoring format',
+                                 validators=[DataRequired()],
                                  choices=['PPR', 'Half-PPR', 'Non-PPR'],
                                  default='Half-PPR')
     
-    num_teams = SelectField('Number of teams', validators=[DataRequired()],
-                             choices=[8, 10, 12, 14, 16],
-                             default=12)
+    num_teams = SelectField('Number of teams',
+                            validators=[DataRequired()],
+                            choices=[8, 10, 12, 14, 16],
+                            default=12)
     
-    roster_size = SelectField('Roster size', validators=[DataRequired()],
+    roster_size = SelectField('Roster size',
+                              validators=[DataRequired()],
                               choices=[i for i in range(15, 21)],
                               default=15)
     
-    projections_source = SelectField('FPts projections data source', validators=[DataRequired()],
-                         choices=[])
+    projections_source = SelectField('FPts projections data source',
+                                     validators=[DataRequired()],
+                                     choices=[])
     
-    adp_source = SelectField('ADP data source', validators=[DataRequired()],
-                         choices=[])
+    adp_source = SelectField('ADP data source',
+                             validators=[DataRequired()],
+                             choices=[])
     
     save_settings = SubmitField('Next')
+
 
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])

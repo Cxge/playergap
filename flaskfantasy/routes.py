@@ -1,4 +1,3 @@
-import math
 import pandas as pd
 from flask import render_template, url_for, request, redirect, session, jsonify, flash
 from flask_mail import Message
@@ -8,17 +7,17 @@ from flaskfantasy.forms import SettingsForm, ContactForm
 from flaskfantasy.models import Adp
 
 
-def urgency(adp, pick_num, next_pick_in, num_teams):
+def urgency(adp, pick_num, next_pick_in):
     if adp <= pick_num + next_pick_in[pick_num - 1]:
-        urgency = {'display': 'High', 'urgency': 1}
+        urg = {'display': 'High', 'urgency': 1}
     elif adp >= pick_num + next_pick_in[pick_num - 1] + next_pick_in[pick_num + next_pick_in[pick_num - 1] - 1]:
-        urgency = {'display': 'Low', 'urgency': 3}
+        urg = {'display': 'Low', 'urgency': 3}
     else:
-        urgency = {'display': 'Medium', 'urgency': 2}
-    return urgency
+        urg = {'display': 'Medium', 'urgency': 2}
+    return urg
 
 
-def ranking(dfDraft, pick_num, next_pick_in, num_teams):
+def ranking(dfDraft, pick_num, next_pick_in):
     dfTopPlayersNextRd = dfDraft.sort_values('adp')
     dfTopPlayersNextRd = dfTopPlayersNextRd.tail(len(dfTopPlayersNextRd) - next_pick_in[pick_num - 1])
     dfTopPlayersNextRd = dfTopPlayersNextRd.groupby('position').head(1)[['player', 'position', 'adp', 'fantasy_points']]
@@ -30,7 +29,7 @@ def ranking(dfDraft, pick_num, next_pick_in, num_teams):
     dfDraft['vor_pct'] = dfDraft.apply(lambda row: 9999.9 if dict_pos.get(row['position']) == 0 else (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
     #dfTopPlayersAvail = dfDraft.sort_values(by='vor_pct', ascending=False)[['player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
     dfTopPlayersAvail = dfDraft[['player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
-    dfTopPlayersAvail['urgency'] = dfTopPlayersAvail.apply(lambda x: urgency(x['adp'], pick_num, next_pick_in, num_teams), axis=1)
+    dfTopPlayersAvail['urgency'] = dfTopPlayersAvail.apply(lambda x: urgency(x['adp'], pick_num, next_pick_in), axis=1)
     draftdata = dfTopPlayersAvail[['player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'urgency']].to_dict(orient='records')
     repldata = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')   
     return draftdata, repldata
@@ -62,7 +61,7 @@ def contact():
 def settings():
     form = SettingsForm()
     choices = ['All (Average)'] + [src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system=='1-QB', Adp.scoring=='Half-PPR', Adp.source_name!='FantasyPros-FFC').distinct()]
-    #choices = list(dict.fromkeys(choices)) #We have FFC and FantasyPros-FFC so we need to remove duplicates after replacing 'FantasyPros-' for ''
+    #choices = list(dict.fromkeys(choices)) #We have FFC and FantasyPros-FFC, so we need to remove duplicates after replacing 'FantasyPros-' for ''
     form.adp_source.choices = choices
     if form.validate_on_submit():
         return redirect(url_for('draft'))
@@ -76,13 +75,12 @@ def draft():
         system = request.form['system']
         scoring_format = request.form['scoring_format']
         num_teams = int(request.form['num_teams'])
-        roster_size = int(request.form['roster_size']) + 2 #Two extra rounds so we have something to compare to in the last round
+        roster_size = int(request.form['roster_size']) + 2 #Two extra rounds, so we have something to compare to in the last round
         # projections_source = request.form['projections_source']
         adp_source = request.form['adp_source']
         pick_num = 1
         dfRoster = pd.DataFrame(data=[['', '', '', '', '']], columns=['team', 'pick', 'player', 'position', 'fantasy_points'])
-    
-        lst_picks_ov = []
+
         lst_picks_ov = [*range(1, roster_size * num_teams + 1)]
         
         lst_picks = []
@@ -204,19 +202,10 @@ def draft():
             ORDER BY fantasy_points DESC
                  """
         
-        dfDraft = pd.DataFrame(db.session.execute(query), columns=['player', 'position', 'fantasy_points', 'adp'])
-        session['pick_num'] = pick_num
-        session['lst_picks_ov'] = lst_picks_ov
-        session['lst_picks'] = lst_picks
-        session['next_pick_in'] = next_pick_in
-        session['team_picking'] = team_picking
-        session['roster_size'] = roster_size
-        session['num_teams'] = num_teams       
-
+        dfDraft = pd.DataFrame(db.session.execute(query), columns=['player', 'position', 'fantasy_points', 'adp'])      
         dfDraft['fantasy_points'] =  dfDraft['fantasy_points'].astype(float).round(1)
         dfDraft['adp'] =  dfDraft['adp'].astype(float).fillna(999.9)
         dfDraft.fillna(0, inplace=True)
-        draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in, session['num_teams'])
         draft_head = ['', 'Player', 'Pos', 'FPts', 'Gap', 'Gap %', 'ADP', 'Urgency']
         repl_head = ['Player', 'Pos', 'FPts', 'ADP']
         team_head = ['Pos', 'Player']
@@ -227,6 +216,13 @@ def draft():
         prev_team_label = 'Made By: Team 0'
         prev_player_label = 'Player'
         prev_pos_label = 'Position'
+        session['pick_num'] = pick_num
+        session['lst_picks_ov'] = lst_picks_ov
+        session['lst_picks'] = lst_picks
+        session['next_pick_in'] = next_pick_in
+        session['team_picking'] = team_picking
+        session['roster_size'] = roster_size
+        session['num_teams'] = num_teams 
         session['draft'] = dfDraft.to_dict(orient='records')
         session['roster'] = dfRoster.to_dict(orient='records')
         session['total_picks'] = (roster_size - 2) * num_teams
@@ -291,7 +287,7 @@ def draft_data():
                         'total_picks': total_picks,
                         'total_players': total_players
                         })
-    draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in, session['num_teams'])
+    draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in)
     dfTeam = pd.DataFrame.from_dict(session['roster'])
     dfTeam = dfTeam.loc[dfTeam.team == team_picking[pick_num - 1]]
     teamdata = dfTeam.to_dict(orient='records')    
@@ -321,8 +317,8 @@ def draft_data():
 @app.route("/results", methods=['GET', 'POST'])
 def results():
     if request.method == "POST":
-        cols = ['Team', 'Pick', 'Player', 'Pos', 'FPts']
-        return render_template('results.html', cols=cols)
+        result_head = ['Team', 'Pick', 'Player', 'Pos', 'FPts']
+        return render_template('results.html', title='Draft', result_head=result_head)
     else:
         return redirect(url_for('settings'))
 

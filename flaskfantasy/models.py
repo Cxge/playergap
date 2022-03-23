@@ -17,7 +17,9 @@ class Adp(db.Model):
     insert_timestamp = db.Column(db.DateTime, nullable=False) 
     
     def __repr__(self):
-        return f"ADP('{self.player}', '{self.position}', '{self.scoring}', '{self.system}', '{self.season}', '{self.source_name}', '{self.source_update}')"
+        return f"ADP('{self.player}', '{self.position}', '{self.scoring}', '{self.system}', '{self.season}', " \
+               f"'{self.source_name}', '{self.source_update}')"
+
 
 class Projections(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,4 +44,5 @@ class Projections(db.Model):
     insert_timestamp = db.Column(db.DateTime, nullable=False) 
     
     def __repr__(self):
-        return f"Projections('{self.player}', '{self.position}', '{self.season}', '{self.source_name}', '{self.source_update}')"
+        return f"Projections('{self.player}', '{self.position}', '{self.season}', '{self.source_name}'," \
+               f" '{self.source_update}')"

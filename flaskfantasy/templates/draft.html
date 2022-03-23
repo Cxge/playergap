@@ -47,15 +47,15 @@
                       <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
                       <label class="form-check-label" for="inlineRadio5">TE</label>
                     </div>
-                    <table id="drafttable" class="table table-hover table-sm nowrap" style="width:100%">
                     <div id="positionfilter" class="p-1"></div>
+                    <table id="drafttable" class="table table-hover table-sm nowrap" style="width:100%">
                         <thead class="thead-custom">
                             <tr>
                                 {% for row in draft_head %}
                                 <th scope="col" class="text-center">{{ row }}</th>
                                 {% endfor %}
                             </tr>
-                        </thead>                         
+                        </thead>
                     </table>
                 </div>
             </div>
@@ -111,176 +111,170 @@
     <script>
         $(document).ready(function(){     
                        
-             var drafttable = $('#drafttable').DataTable({
-                  'scrollY': 365,
-                  'scrollX': true,
-                  'paging': false,
-                  'info': false,
-                  'ajax': {
-                      'url': '/draft_data',
-                      'type': 'GET',
-                      'dataSrc': 'draftdata'
-                  },
-                  'rowCallback': function ( row, data, index ) {
-                        if ( data.vor_pct > 0 ) {
+            var drafttable = $('#drafttable').DataTable({
+                'scrollY': 365,
+                'scrollX': true,
+                'paging': false,
+                'info': false,
+                'ajax': {
+                    'url': '/draft_data',
+                    'type': 'GET',
+                    'dataSrc': 'draftdata'
+                },
+                'rowCallback': function ( row, data, index ) {
+                    if ( data.vor_pct > 0 ) {
                         $('td:eq(5)', row).css('color', '#00C248');} //38E277
-                        else if ( data.vor_pct < 0 ) {
+                    else if ( data.vor_pct < 0 ) {
                         $('td:eq(5)', row).css('color', '#FF2C00');} //FF603F
-                  },
-                  'columns': [
-                      {defaultContent: '<button class="btn btn-pick"><i class="bi bi-plus-circle-fill"></i></button>'},
-                      {data: 'player'},
-                      {data: 'position'},
-                      {data: 'fantasy_points'},
-                      {data: 'vor_pts'},
-                      {data: 'vor_pct'},
-                      {data: 'adp'},
-                      {data: {
-                          _: 'urgency.display',
-                          sort: 'urgency.urgency'
-                       } }
-                  ],
-                   'columnDefs': [
-                        { orderable: false, targets: 0 },
-                        { className: 'fw-bold', targets: 5 },
-                        { render: DataTable.render.number(',', '.', '1'), targets: [3, 4, 5, 6]}
-                   ],
-                  'order': [[ 7, 'asc' ], [ 5, 'desc' ], [ 6, 'asc' ]]
-            
+                },
+                'columns': [
+                    {defaultContent: '<button class="btn btn-pick"><i class="bi bi-plus-circle-fill"></i></button>'},
+                    {data: 'player'},
+                    {data: 'position'},
+                    {data: 'fantasy_points'},
+                    {data: 'vor_pts'},
+                    {data: 'vor_pct'},
+                    {data: 'adp'},
+                    {data: 
+                        {_: 'urgency.display',
+                            sort: 'urgency.urgency'
+                        }   
+                    }
+                ],
+                'columnDefs': [
+                    { orderable: false, targets: 0 },
+                    { className: 'fw-bold', targets: 5 },
+                    { render: DataTable.render.number(',', '.', '1'), targets: [3, 4, 5, 6]}
+                ],
+                'order': [[ 7, 'asc' ], [ 5, 'desc' ], [ 6, 'asc' ]]
             });
             
-              $('.search').click(function() {
+            $('.search').click(function() {
                 drafttable.column(2).search($(this).data('val')).draw();
-              });         
+            });         
             
-             var repltable = $('#repltable').DataTable({
-                  'scrollX': true,
-                  'paging': false,
-                  'searching': false,
-                  'info': false,
-                  'ajax': {
-                      'url': '/draft_data',
-                      'type': 'GET',
-                      'dataSrc': 'repldata'
-                  },
-                  'columns': [
-                      {data: 'player'},
-                      {data: 'position'},
-                      {data: 'fantasy_points'},
-                      {data: 'adp'}
-                      ],
-                  'columnDefs': [
-                        { render: DataTable.render.number(',', '.', '1'), targets: [2, 3] }
-                      ],
-                  'order': [[ 1, 'asc' ]]
+            var repltable = $('#repltable').DataTable({
+                'scrollX': true,
+                'paging': false,
+                'searching': false,
+                'info': false,
+                'ajax': {
+                    'url': '/draft_data',
+                    'type': 'GET',
+                    'dataSrc': 'repldata'
+                },
+                'columns': [
+                    {data: 'player'},
+                    {data: 'position'},
+                    {data: 'fantasy_points'},
+                    {data: 'adp'}
+                ],
+                'columnDefs': [
+                    { render: DataTable.render.number(',', '.', '1'), targets: [2, 3] }
+                ],
+                'order': [[ 1, 'asc' ]]
             });
             
-             var teamtable = $('#teamtable').DataTable({
-                  'scrollY': 450,
-                  'scrollX': true,
-                  'paging': false,
-                  'searching': false,
-                  'info': false,
-                  'language': {'emptyTable': 'No players selected'},
-                  'ajax': {
-                      'url': '/draft_data',
-                      'type': 'GET',
-                      'dataSrc': 'teamdata'
-                  },
-                  'columns': [
-                      {data: 'position'},
-                      {data: 'player'}
-                      ],
-                  'columnDefs': [
-                        {'width':'30%', targets: 0}
-                      ]
+            var teamtable = $('#teamtable').DataTable({
+                'scrollY': 450,
+                'scrollX': true,
+                'paging': false,
+                'searching': false,
+                'info': false,
+                'language': {'emptyTable': 'No players selected'},
+                'ajax': {
+                    'url': '/draft_data',
+                    'type': 'GET',
+                    'dataSrc': 'teamdata'
+                },
+                'columns': [
+                    {data: 'position'},
+                    {data: 'player'}
+                ],
+                'columnDefs': [
+                    {'width':'30%', targets: 0}
+                ]
             });
             
-        $('#drafttable tbody').on('click', '.btn-pick', function() {
-            var data = drafttable.row($(this).parents('tr')).data();
-            var player = data.player;
-            var position = data.position;
-            var fantasy_points = data.fantasy_points;
-            
-            req = $.ajax({
-                url: '/draft_data',
-                type: 'POST',
-                data: {'player' : player, 'position' : position, 'fantasy_points': fantasy_points}
-            });
-            
-            $('.btn-pick').attr("disabled", true);
-            $('#undo-btn').attr("disabled", true);
-            
-            req.done(function(data) {
-                if (data.pick_num > 1) {
-                    $('#undo-btn').attr("disabled", false);                   
-                } else {
-                    $('#undo-btn').attr("disabled", true);
+            $('#drafttable tbody').on('click', '.btn-pick', function() {
+                var data = drafttable.row($(this).parents('tr')).data();
+                var player = data.player;
+                var position = data.position;
+                var fantasy_points = data.fantasy_points;
+                
+                req = $.ajax({
+                    url: '/draft_data',
+                    type: 'POST',
+                    data: {'player' : player, 'position' : position, 'fantasy_points': fantasy_points}
+                });
+                
+                $('.btn-pick').attr("disabled", true);
+                $('#undo-btn').attr("disabled", true);
+                
+                req.done(function(data) {
+                    if (data.pick_num > 1) {
+                        $('#undo-btn').attr("disabled", false);                   
+                    } else {
+                        $('#undo-btn').attr("disabled", true);
                     };
-                if (data.pick_num > Math.min(data.total_players, data.total_picks)) {
-                    alert( 'That was the last pick of the draft. Good luck!' );
-                    var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
-                    $("body").append($form);
-                    $form.submit();                   
-                } else {
-                         // drafttable.ajax.reload();
-                         // repltable.ajax.reload();
-                         // teamtable.ajax.reload();
-                         drafttable.clear();
-                         drafttable.rows.add(data.draftdata);
-                         drafttable.draw();
-                         repltable.clear();
-                         repltable.rows.add(data.repldata);
-                         repltable.draw();
-                         teamtable.clear();
-                         teamtable.rows.add(data.teamdata);
-                         teamtable.draw();
-                         $('#picklabel').text(data.pick_label);
-                         $('#nextpicklabel').text(data.next_pick_label);
-                         $('#teamlabel').text(data.team_label);
-                         $('#prevpicklabel').text(data.prev_pick_label);
-                         $('#prevteamlabel').text(data.prev_team_label);
-                         $('#prevplayerlabel').text(data.prev_player_label);
-                         $('#prevposlabel').text(data.prev_pos_label);
+                    if (data.pick_num > Math.min(data.total_players, data.total_picks)) {
+                        alert('That was the last pick of the draft. Good luck!');
+                        var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
+                        $("body").append($form);
+                        $form.submit();                   
+                    } else {
+                        drafttable.clear();
+                        drafttable.rows.add(data.draftdata);
+                        drafttable.draw();
+                        repltable.clear();
+                        repltable.rows.add(data.repldata);
+                        repltable.draw();
+                        teamtable.clear();
+                        teamtable.rows.add(data.teamdata);
+                        teamtable.draw();
+                        $('#picklabel').text(data.pick_label);
+                        $('#nextpicklabel').text(data.next_pick_label);
+                        $('#teamlabel').text(data.team_label);
+                        $('#prevpicklabel').text(data.prev_pick_label);
+                        $('#prevteamlabel').text(data.prev_team_label);
+                        $('#prevplayerlabel').text(data.prev_player_label);
+                        $('#prevposlabel').text(data.prev_pos_label);
                     };
-                 });
+                });
             });
-            
-        $('#undo-btn').on('click', function() {            
-            req = $.ajax({
-                url: '/draft_data',
-                type: 'POST'
-            });
-            
-            $('.btn-pick').attr("disabled", true);
-            $('#undo-btn').attr("disabled", true);
-            
-            req.done(function(data) {
-                if (data.pick_num > 1) {
-                    $('#undo-btn').attr("disabled", false);                   
-                } else {
-                    $('#undo-btn').attr("disabled", true);
+                
+            $('#undo-btn').on('click', function() {            
+                req = $.ajax({
+                    url: '/draft_data',
+                    type: 'POST'
+                });
+                
+                $('.btn-pick').attr("disabled", true);
+                $('#undo-btn').attr("disabled", true);
+                
+                req.done(function(data) {
+                    if (data.pick_num > 1) {
+                        $('#undo-btn').attr("disabled", false);                   
+                    } else {
+                        $('#undo-btn').attr("disabled", true);
                     };
-                // drafttable.ajax.reload();
-                // repltable.ajax.reload();
-                // teamtable.ajax.reload();
-                drafttable.clear();
-                drafttable.rows.add(data.draftdata);
-                drafttable.draw();
-                repltable.clear();
-                repltable.rows.add(data.repldata);
-                repltable.draw();
-                teamtable.clear();
-                teamtable.rows.add(data.teamdata);
-                teamtable.draw();
-                $('#picklabel').text(data.pick_label);
-                $('#nextpicklabel').text(data.next_pick_label);
-                $('#teamlabel').text(data.team_label);
-                $('#prevpicklabel').text(data.prev_pick_label);
-                $('#prevteamlabel').text(data.prev_team_label);
-                $('#prevplayerlabel').text(data.prev_player_label);
-                $('#prevposlabel').text(data.prev_pos_label);
-                 });
+                    drafttable.clear();
+                    drafttable.rows.add(data.draftdata);
+                    drafttable.draw();
+                    repltable.clear();
+                    repltable.rows.add(data.repldata);
+                    repltable.draw();
+                    teamtable.clear();
+                    teamtable.rows.add(data.teamdata);
+                    teamtable.draw();
+                    $('#picklabel').text(data.pick_label);
+                    $('#nextpicklabel').text(data.next_pick_label);
+                    $('#teamlabel').text(data.team_label);
+                    $('#prevpicklabel').text(data.prev_pick_label);
+                    $('#prevteamlabel').text(data.prev_team_label);
+                    $('#prevplayerlabel').text(data.prev_player_label);
+                    $('#prevposlabel').text(data.prev_pos_label);
+                });
             });
         });
     </script>

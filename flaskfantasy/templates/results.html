@@ -9,14 +9,14 @@
                 <table id="resultstable" class="table table-hover table-sm nowrap" style="width:100%">
                     <thead class="thead-custom">
                         <tr>
-                            {% for row in cols %}
+                            {% for row in result_head %}
                             <th scope="col" class="text-center">{{ row }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tfoot>
                         <tr>
-                            {% for row in cols[:-2] %}
+                            {% for row in result_head[:-2] %}
                             <th></th>
                             {% endfor %}
                             <th class="text-center">Total: </th>
