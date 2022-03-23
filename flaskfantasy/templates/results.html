@@ -2,12 +2,12 @@
 
 {% block content %}
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="content-section">
-            <h5 class="border-bottom font-weight-bold p-2">Draft Results</h5>
-            <div id="teamfilter" class="p-2 d-flex justify-content-center">Team:&nbsp;&nbsp;</div>
-                <table id="resultstable" class="table display compact" style="width:100%">
-                    <thead class="">
+                <h5 class="border-bottom fw-bold p-2">Draft Results</h5>
+                <div id="teamfilter" class="p-2 d-flex justify-content-center">Team:&nbsp;&nbsp;</div>
+                <table id="resultstable" class="table table-hover table-sm nowrap" style="width:100%">
+                    <thead class="thead-custom">
                         <tr>
                             {% for row in cols %}
                             <th scope="col" class="text-center">{{ row }}</th>
@@ -34,9 +34,9 @@
         $(document).ready(function(){     
                        
              var resultstable = $('#resultstable').DataTable({
+                  'responsive': true,
                   'paging': false,
                   'info': false,
-                  'responsive': true,
                   'sDom': 'ltr',
                   'ajax': {
                       'url': '/results_data',
@@ -77,7 +77,12 @@
                         });
                     },
                     drawCallback: function () {
-                      var sum = $('#resultstable').DataTable().column(4, {filter:'applied'}).data().sum().toFixed(1);
+                      var sum = $('#resultstable')
+                        .DataTable().column(4, {filter:'applied'})
+                        .data()
+                        .reduce( function (a, b) {
+                            return (parseFloat(a) + parseFloat(b)).toFixed(1);
+                        }, 0 );
                       $('#total').html(sum);
                     }	
             

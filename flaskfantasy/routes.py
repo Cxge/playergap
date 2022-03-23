@@ -1,43 +1,46 @@
-from flask import render_template, url_for, request, redirect, session, jsonify, flash
-from flaskfantasy import app, mail
-from flaskfantasy.forms import SettingsForm, BeginForm, ContactForm
+import math
 import pandas as pd
-import psycopg2
-from psycopg2.extensions import parse_dsn
-import os
+from flask import render_template, url_for, request, redirect, session, jsonify, flash
 from flask_mail import Message
 
-DATABASE_URL = parse_dsn(os.environ.get('DATABASE_URL'))
+from flaskfantasy import app, db, mail
+from flaskfantasy.forms import SettingsForm, ContactForm
+from flaskfantasy.models import Adp
 
-def priority(adp, pick_num, next_pick_in, num_teams):
+
+def urgency(adp, pick_num, next_pick_in, num_teams):
     if adp <= pick_num + next_pick_in[pick_num - 1]:
-        priority = {'display': 'High', 'priority': 1}
+        urgency = {'display': 'High', 'urgency': 1}
     elif adp >= pick_num + next_pick_in[pick_num - 1] + next_pick_in[pick_num + next_pick_in[pick_num - 1] - 1]:
-        priority = {'display': 'Low', 'priority': 3}
+        urgency = {'display': 'Low', 'urgency': 3}
     else:
-        priority = {'display': 'Medium', 'priority': 2}
-    return priority
+        urgency = {'display': 'Medium', 'urgency': 2}
+    return urgency
+
 
 def ranking(dfDraft, pick_num, next_pick_in, num_teams):
     dfTopPlayersNextRd = dfDraft.sort_values('adp')
     dfTopPlayersNextRd = dfTopPlayersNextRd.tail(len(dfTopPlayersNextRd) - next_pick_in[pick_num - 1])
     dfTopPlayersNextRd = dfTopPlayersNextRd.groupby('position').head(1)[['player', 'position', 'adp', 'fantasy_points']]
     dict_pos = dict(zip(dfTopPlayersNextRd['position'], dfTopPlayersNextRd['fantasy_points']))
-    dfDraft['vor_pts'] = dfDraft.apply(lambda row: row['fantasy_points'] - (dict_pos.get(row['position'])), axis=1).round(1)
-    dfDraft['vor_pct'] = dfDraft.apply(lambda row: (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
-    dfTopPlayersAvail = dfDraft.sort_values(by='vor_pct', ascending=False)[['player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
-    dfTopPlayersAvail['priority'] = dfTopPlayersAvail.apply(lambda x: priority(x['adp'], pick_num, next_pick_in, num_teams), axis=1)
-    draftdata = dfTopPlayersAvail[['player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'priority']].to_dict(orient='records')
+    for key in ['QB', 'RB', 'TE', 'WR']:
+        if key not in dict_pos.keys():
+            dict_pos[key] = 0
+    dfDraft['vor_pts'] = dfDraft.apply(lambda row: row['fantasy_points'] - dict_pos.get(row['position']), axis=1).round(1)
+    dfDraft['vor_pct'] = dfDraft.apply(lambda row: 9999.9 if dict_pos.get(row['position']) == 0 else (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
+    #dfTopPlayersAvail = dfDraft.sort_values(by='vor_pct', ascending=False)[['player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
+    dfTopPlayersAvail = dfDraft[['player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
+    dfTopPlayersAvail['urgency'] = dfTopPlayersAvail.apply(lambda x: urgency(x['adp'], pick_num, next_pick_in, num_teams), axis=1)
+    draftdata = dfTopPlayersAvail[['player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'urgency']].to_dict(orient='records')
     repldata = dfTopPlayersNextRd[['player', 'position', 'fantasy_points', 'adp']].to_dict(orient='records')   
-    return draftdata, repldata    
+    return draftdata, repldata
+
 
 @app.route("/", methods=['GET','POST'])
 @app.route("/home", methods=['GET','POST'])
 def home():
-    form = BeginForm()
-    if form.validate_on_submit():
-        return redirect(url_for('settings'))
-    return render_template('home.html', form=form)
+    return render_template('index.html')
+
 
 @app.route("/contact", methods=['GET','POST'])
 def contact():
@@ -54,21 +57,27 @@ def contact():
         return redirect(url_for('home'))
     return render_template('contact.html', title='Contact', form=form)
 
+
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
     form = SettingsForm()
+    choices = ['All (Average)'] + [src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system=='1-QB', Adp.scoring=='Half-PPR', Adp.source_name!='FantasyPros-FFC').distinct()]
+    #choices = list(dict.fromkeys(choices)) #We have FFC and FantasyPros-FFC so we need to remove duplicates after replacing 'FantasyPros-' for ''
+    form.adp_source.choices = choices
     if form.validate_on_submit():
         return redirect(url_for('draft'))
     return render_template('settings.html', title='Settings', form=form)
-    
+
+
 @app.route("/draft", methods=['GET', 'POST'])
 def draft():
     if request.method == 'POST':      
         session.clear()
+        system = request.form['system']
         scoring_format = request.form['scoring_format']
         num_teams = int(request.form['num_teams'])
-        roster_size = int(request.form['roster_size']) + 2 #Two extra round to have something to compare to in the last round
-        projections_source = request.form['projections_source']
+        roster_size = int(request.form['roster_size']) + 2 #Two extra rounds so we have something to compare to in the last round
+        # projections_source = request.form['projections_source']
         adp_source = request.form['adp_source']
         pick_num = 1
         dfRoster = pd.DataFrame(data=[['', '', '', '', '']], columns=['team', 'pick', 'player', 'position', 'fantasy_points'])
@@ -91,43 +100,111 @@ def draft():
             else:
                 team_picking += range(1, num_teams + 1)
         
-        format_values = {'Half-PPR':[0.04, 4, -2, 0.1, 6, 0.5, 0.1, 6],
-                         'PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6],
-                         'Non-PPR':[0.04, 4, -2, 0.1, 6, 1, 0.1, 6]}
+        format_values = {'Half-PPR':[0.04, 4, -2, 0.1, 6, 0.5, 0.1, 6, -2],
+                         'PPR':     [0.04, 4, -2, 0.1, 6, 1,   0.1, 6, -2],
+                         'Non-PPR': [0.04, 4, -2, 0.1, 6, 1,   0.1, 6, -2]}
         
-        con = psycopg2.connect(f"dbname={DATABASE_URL.get('dbname')} user={DATABASE_URL.get('user')} password={DATABASE_URL.get('password')} host={DATABASE_URL.get('host')} port={DATABASE_URL.get('port')}")
-        cur = con.cursor()
+        how_join = 'RIGHT' if system == 'Rookie' else 'LEFT'
+        col_join = 'B.player, B.position, A.fantasy_points, B.adp' if system == 'Rookie' else 'A.player, A.position, A.fantasy_points, B.adp'
+    
+        if adp_source == 'All (Average)':
+            adp_query = f"""SELECT A.player, A.position, AVG(A.adp) AS adp
+                            FROM adp A
+                            INNER JOIN (
+                                SELECT source_name, MAX(source_update) AS source_update
+                                FROM adp 
+                                WHERE system = '{system}'
+                                AND scoring = '{scoring_format}'
+                                AND source_name != 'FantasyPros-FFC'
+                                GROUP BY source_name
+                            ) B
+                            ON A.source_name = B.source_name AND A.source_update = B.source_update
+                            WHERE system = '{system}'
+                            AND scoring = '{scoring_format}'
+                            GROUP BY A.player, A.position
+            """
+
+        else:
+            adp_query = f"""SELECT player, position, adp
+                             FROM adp
+                             WHERE system = '{system}'
+                             AND scoring = '{scoring_format}'
+                             AND source_name = '{adp_source if adp_source in ['FFC', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
+                             AND source_update = (SELECT MAX(source_update) 
+                                                     FROM adp 
+                                                     WHERE system = '{system}'
+                                                     AND scoring = '{scoring_format}'
+                                                     AND source_name = '{adp_source if adp_source in ['FFC', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
+                                                 )
+            """
+
+        # if system == '1-QB':
+        #     adp_query = f""" 
+        #     SELECT player, position, AVG(adp) AS adp
+        #                     FROM adp
+        #                     WHERE system = '{system}'
+        #                     AND scoring = '{scoring_format}'
+        #                     AND source_name LIKE 'FantasyPros-%'
+        #                     AND source_update = (SELECT MAX(source_update) 
+        #                                             FROM adp 
+        #                                             WHERE system = '{system}'
+        #                                             AND scoring = '{scoring_format}'
+        #                                             AND source_name LIKE 'FantasyPros-%'
+        #                                         )
+        #                     GROUP BY player, position
+        #                 """
+        # elif system == '2-QB':
+        #      adp_query = f"""
+        #      SELECT player, position, adp
+        #                     FROM adp
+        #                     WHERE system = '{system}'
+        #                     AND scoring = '{scoring_format}'
+        #                     AND source_update = (SELECT MAX(source_update) 
+        #                                             FROM adp 
+        #                                             WHERE system = '{system}'
+        #                                             AND scoring = '{scoring_format}'
+        #                                         )
+        #                 """  
+        # else:
+        #      adp_query = f"""
+        #      SELECT player, position, adp
+        #                     FROM adp
+        #                     WHERE system = '{system}'
+        #                     AND scoring = '{scoring_format}'
+        #                     AND source_name = 'FantasyPros'
+        #                     AND source_update = (SELECT MAX(source_update) 
+        #                                             FROM adp 
+        #                                             WHERE system = '{system}'
+        #                                             AND scoring = '{scoring_format}'
+        #                                             AND source_name = 'FantasyPros'
+        #                                         )
+        #                 """              
+
         query = f"""
-        
-        SELECT A.player, A.position, A.fantasy_points, B.adp
+        SELECT {col_join}
         FROM        
-            (SELECT player, position, passing_yard   * {format_values[scoring_format][0]}
-                                                    + passing_td     * {format_values[scoring_format][1]}
-                                                    + passing_int    * {format_values[scoring_format][2]}
-                                                    + rushing_yard   * {format_values[scoring_format][3]}
-                                                    + rushing_td     * {format_values[scoring_format][4]}
-                                                    + receiving_rec  * {format_values[scoring_format][5]}
-                                                    + receiving_yard * {format_values[scoring_format][6]}
-                                                    + receiving_td   * {format_values[scoring_format][7]} AS fantasy_points
+            (SELECT player, position, pass_yd    * {format_values[scoring_format][0]}
+                                    + pass_td    * {format_values[scoring_format][1]}
+                                    + pass_int   * {format_values[scoring_format][2]}
+                                    + rush_yd    * {format_values[scoring_format][3]}
+                                    + rush_td    * {format_values[scoring_format][4]}
+                                    + receiv_rec * {format_values[scoring_format][5]}
+                                    + receiv_yd  * {format_values[scoring_format][6]}
+                                    + receiv_td  * {format_values[scoring_format][7]} 
+                                    + fumble_lst * {format_values[scoring_format][8]} AS fantasy_points
                         FROM projections
-                        WHERE source_name = '{projections_source}'
-                        AND source_update = (SELECT MAX(source_update) FROM projections WHERE source_name = '{projections_source}')
+                        WHERE source_name = 'FantasyPros'
+                        AND position NOT IN ('DST', 'K')
+                        AND source_update = (SELECT MAX(source_update) FROM projections WHERE source_name = 'FantasyPros')
             ) A
-            LEFT JOIN
-            (SELECT player, position, adp
-                        FROM average_draft_position
-                        WHERE source_name = '{adp_source}'
-                        AND scoring = '{scoring_format}'
-                        AND source_update = (SELECT MAX(source_update) FROM average_draft_position WHERE source_name = '{adp_source}')
+            {how_join} JOIN
+            ({adp_query}
             ) B
             ON (A.player=B.player AND A.position=B.position)
-            ORDER BY fantasy_points DESC        
-            
+            ORDER BY fantasy_points DESC
                  """
-        cur.execute(query)
-        dfDraft = pd.DataFrame(cur.fetchall(), columns=['player', 'position', 'fantasy_points', 'adp'])
-        cur.close()
-        con.close()
+        
+        dfDraft = pd.DataFrame(db.session.execute(query), columns=['player', 'position', 'fantasy_points', 'adp'])
         session['pick_num'] = pick_num
         session['lst_picks_ov'] = lst_picks_ov
         session['lst_picks'] = lst_picks
@@ -137,11 +214,12 @@ def draft():
         session['num_teams'] = num_teams       
 
         dfDraft['fantasy_points'] =  dfDraft['fantasy_points'].astype(float).round(1)
-        dfDraft['adp'] =  dfDraft['adp'].astype(float).fillna(999)
+        dfDraft['adp'] =  dfDraft['adp'].astype(float).fillna(999.9)
+        dfDraft.fillna(0, inplace=True)
         draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in, session['num_teams'])
-        Cols1 = ['', 'Player', 'Pos', 'FPts', 'Gap', 'Gap %', 'ADP', 'Priority']
-        Cols2 = ['Player', 'Pos', 'FPts', 'ADP']
-        Cols3 = ['Pos', 'Player']
+        draft_head = ['', 'Player', 'Pos', 'FPts', 'Gap', 'Gap %', 'ADP', 'Urgency']
+        repl_head = ['Player', 'Pos', 'FPts', 'ADP']
+        team_head = ['Pos', 'Player']
         pick_label = 'Current Pick: ' + lst_picks[pick_num - 1] + ' - #' + str(pick_num) + ' Overall'
         team_label = 'Team ' + str(team_picking[pick_num - 1])
         next_pick_label = 'Next Pick: ' + lst_picks[pick_num + next_pick_in[pick_num - 1] - 1] + ' - #' + str(lst_picks_ov[pick_num + next_pick_in[pick_num - 1] - 1]) + ' Overall'
@@ -149,22 +227,24 @@ def draft():
         prev_team_label = 'Made By: Team 0'
         prev_player_label = 'Player'
         prev_pos_label = 'Position'
-        session['draft'] = draftdata   
+        session['draft'] = dfDraft.to_dict(orient='records')
         session['roster'] = dfRoster.to_dict(orient='records')
         session['total_picks'] = (roster_size - 2) * num_teams
         return render_template('draft.html', title='Draft', 
+                                draft_head=draft_head,
+                                repl_head=repl_head, 
+                                team_head=team_head,
                                 pick_label=pick_label, 
                                 team_label=team_label,
                                 next_pick_label=next_pick_label,
                                 prev_pick_label=prev_pick_label,
                                 prev_team_label=prev_team_label,
                                 prev_player_label=prev_player_label,
-                                prev_pos_label=prev_pos_label,
-                                headings1=Cols1,
-                                headings2=Cols2, 
-                                headings3=Cols3)
+                                prev_pos_label=prev_pos_label
+                            )
     else:
         return redirect(url_for('settings'))
+
 
 @app.route("/draft_data", methods=['GET', 'POST'])
 def draft_data():  
@@ -185,7 +265,7 @@ def draft_data():
         dfRoster = pd.DataFrame.from_dict(session['roster'])
         dfRoster = dfRoster[:-1]         
         session['roster'] = dfRoster.to_dict(orient='records')        
-    #return ''
+
     pick_num = session['pick_num']
     lst_picks_ov = session['lst_picks_ov']
     lst_picks = session['lst_picks']
@@ -193,8 +273,24 @@ def draft_data():
     team_picking = session['team_picking']
     total_picks = session['total_picks']
     dfDraft = pd.DataFrame.from_dict(session['draft'])
+    total_players = len(dfDraft)
     dfRoster = pd.DataFrame.from_dict(session['roster'])
     dfDraft = dfDraft.loc[~dfDraft['player'].isin(dfRoster['player'])]
+    if dfDraft.empty:
+        return jsonify({'draftdata': '',
+                        'repldata': '',
+                        'teamdata': '',
+                        'pick_label': '',
+                        'next_pick_label': '',
+                        'team_label': '',
+                        'prev_pick_label': '',
+                        'prev_team_label': '',
+                        'prev_player_label': '',
+                        'prev_pos_label': '',
+                        'pick_num': pick_num,
+                        'total_picks': total_picks,
+                        'total_players': total_players
+                        })
     draftdata, repldata = ranking(dfDraft, pick_num, next_pick_in, session['num_teams'])
     dfTeam = pd.DataFrame.from_dict(session['roster'])
     dfTeam = dfTeam.loc[dfTeam.team == team_picking[pick_num - 1]]
@@ -212,12 +308,15 @@ def draft_data():
                     'pick_label': pick_label,
                     'next_pick_label': next_pick_label,
                     'team_label': team_label,
-                    'pick_num': pick_num,
-                    'total_picks': total_picks,
                     'prev_pick_label': prev_pick_label,
                     'prev_team_label': prev_team_label,
                     'prev_player_label': prev_player_label,
-                    'prev_pos_label': prev_pos_label})
+                    'prev_pos_label': prev_pos_label,
+                    'pick_num': pick_num,
+                    'total_picks': total_picks,
+                    'total_players': total_players
+                    })
+
 
 @app.route("/results", methods=['GET', 'POST'])
 def results():
@@ -226,8 +325,29 @@ def results():
         return render_template('results.html', cols=cols)
     else:
         return redirect(url_for('settings'))
-    
+
+
 @app.route("/results_data", methods=['GET'])
 def results_data():
     resultsdata = session['roster'][1:]
     return jsonify({'data' : resultsdata})
+
+
+@app.route("/settings/num_rounds/<system>")
+def num_rounds(system):
+    if system == 'Rookie':
+        choices = [*range(3, 6)]
+    elif system == 'Dynasty':    
+        choices = [*range(20, 31)]
+    else:
+        choices = [*range(15, 21)]
+    return jsonify({'num_rounds': choices})
+
+
+@app.route("/settings/adp_sources/<system>/<scoring>")
+def adp_sources(system, scoring):
+    choices = [src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system==system, 
+        Adp.scoring==scoring, Adp.season==2021).distinct()]
+    if system == '1-QB':
+        choices = ['All (Average)'] + choices
+    return jsonify({'adp_sources': choices})

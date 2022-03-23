@@ -1,38 +1,103 @@
 {% extends "layout.html" %}
+
 {% block content %}
-    <div class="row">
-        <div class="col-md-8">
-            <div class="content-section">
-                <form method="POST" action="/draft">
-                    {{ form.hidden_tag() }}
-                    <fieldset class="form-group">
-                        <legend class="border-bottom mb-4"><b>Draft Settings</b></legend>
-                        <div class="form-group">
-                            {{ form.scoring_format.label() }}
-                            {{ form.scoring_format(class="form-control") }}
+    <div class="container px-5 py-5">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="content-section">
+                    <form method="POST" action="/draft">
+                        {{ form.hidden_tag() }}
+                        <fieldset>
+                            <legend class="border-bottom mb-4"><b>Draft Settings</b></legend>
+                            <div class="mb-3">
+                                {{ form.system.label(class="form-label") }}
+                                {{ form.system(class="form-select") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.scoring_format.label(class="form-label") }}
+                                {{ form.scoring_format(class="form-select") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.adp_source.label(class="form-label") }}
+                                {{ form.adp_source(class="form-select") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.num_teams.label(class="form-label") }}
+                                {{ form.num_teams(class="form-select") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.roster_size.label(class="form-label") }}
+                                {{ form.roster_size(class="form-select") }}
+                            </div>
+                            <!-- 
+                            <div class=" mb-3">
+                                {{ form.projections_source.label(class="form-label") }}
+                                {{ form.projections_source(class="form-select") }}
+                            </div>
+                             -->
+                            
+                        </fieldset>
+                        <div>
+                            {{ form.save_settings(class="btn btn-custom") }}
                         </div>
-                        <div class="form-group">
-                            {{ form.num_teams.label() }}
-                            {{ form.num_teams(class="form-control") }}
-                        </div>
-                        <div class="form-group">
-                            {{ form.roster_size.label() }}
-                            {{ form.roster_size(class="form-control") }}
-                        </div>
-                        <div class="form-group">
-                            {{ form.projections_source.label() }}
-                            {{ form.projections_source(class="form-control") }}
-                        </div>
-                        <div class="form-group">
-                            {{ form.adp_source.label() }}
-                            {{ form.adp_source(class="form-control") }}
-                        </div>
-                    </fieldset>
-                    <div>
-                        {{ form.save_settings(class="btn btn-info") }}
-                    </div>
-                </form>
-            </div> 
+                    </form>
+                    <script>
+                        let system_select = document.getElementById('system');
+                        let num_teams_select = document.getElementById('num_teams');
+                        let roster_size_select = document.getElementById('roster_size');
+                        let scoring_format_select = document.getElementById('scoring_format');
+                        let adp_source_select = document.getElementById('adp_source');
+                        
+                        system_select.onchange = function() {
+                            system = system_select.value;
+                            scoring_format = scoring_format_select.value;
+                            num_teams = num_teams_select.value;  
+                            adp_source = adp_source_select.value; 
+                            
+                            fetch('/settings/adp_sources/' + system + '/' + scoring_format).then(function(response) {
+                                response.json().then(function(data) {
+                                    let optionHTML = '';
+                                    for (let src of data.adp_sources) {
+                                        optionHTML += '<option value="' + src + '">' + src + '</option>';
+                                    }
+                                    
+                                    adp_source_select.innerHTML = optionHTML;
+                                    
+                                });
+                            });
+
+                            fetch('/settings/num_rounds/' + system).then(function(response) {
+                                response.json().then(function(data) {
+                                    let optionHTML = '';
+                                    for (let rd of data.num_rounds) {
+                                        optionHTML += '<option value="' + rd + '">' + rd + '</option>';
+                                    }
+                                    
+                                    roster_size_select.innerHTML = optionHTML;
+                                    
+                                });
+                            });                            
+                        }
+                        
+                        scoring_format_select.onchange = function() {
+                            system = system_select.value;
+                            scoring_format = scoring_format_select.value;  
+                            
+                            fetch('/settings/adp_sources/' + system + '/' + scoring_format).then(function(response) {
+                                response.json().then(function(data) {
+                                    let optionHTML = '';
+                                    for (let src of data.adp_sources) {
+                                        optionHTML += '<option value="' + src + '">' + src + '</option>';
+                                    }
+                                    
+                                    adp_source_select.innerHTML = optionHTML;
+                                    
+                                });
+                            });
+                        }
+                    </script>
+                </div> 
+            </div>
         </div>
     </div>
 {% endblock content %}

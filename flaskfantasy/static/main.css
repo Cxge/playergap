@@ -1,23 +1,35 @@
+html {
+    width: 100vw;
+    overflow-x: hidden;
+}
+
 body {
-  background: #fafafa;
-  color: #333333;
-  margin-top: 5rem;
+  background: #F8F8F8;
+  color: #485162;
+}
+
+td {
+  vertical-align: middle;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #444444;
+  color: #485162;
 }
 
 .bg-steel {
-  background-color: #5f788a;
+  background-color: #485162;
 }
 
-.site-header .navbar-nav .nav-link {
-  color: #cbd5db;
+.bg-blue {
+  background-color: #3CACD7;
 }
 
-.site-header .navbar-nav .nav-link:hover {
-  color: #ffffff;
+.nav-link {
+  color: #C9C9C9;
+}
+
+.nav-link:hover {
+  color: #F8F8F8;
 }
 
 .site-header .navbar-nav .nav-link.active {
@@ -25,56 +37,75 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .content-section {
-  background: #ffffff;
+  background: #FFFFFF;
   padding: 10px 20px;
-  border: 1px solid #dddddd;
+  border: 1px solid #DDDDDD;
   border-radius: 3px;
   margin-bottom: 20px;
 }
 
-.article-title {
-  color: #444444;
+.btn-custom {
+  color: #485162;
+  background-color: #FF9678;
+  border-color: #FF9678;
 }
 
-a.article-title:hover {
-  color: #428bca;
-  text-decoration: none;
+.btn-custom:hover {
+  color: #485162;
+  background-color: #FC8D6D;
+  border-color: #FC8D6D;
 }
 
-.article-content {
-  white-space: pre-line;
+.btn-pick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.65rem;
+  width: 1.65rem;
+  font-size: 1.65rem;
+  color: #3CACD7;
+  padding: 0;
+  border: 0;
+  line-height: 0;
 }
 
-.article-img {
-  height: 65px;
-  width: 65px;
-  margin-right: 16px;
+.btn-pick:hover {
+  color: #1A99CA;
+  background-size: 0rem 0rem;
 }
 
-.article-metadata {
-  padding-bottom: 1px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #e3e3e3
+.form-check-input:checked {
+    background-color: #485162;
+    border-color: #485162;
 }
 
-.article-metadata a:hover {
-  color: #333;
-  text-decoration: none;
+.thead-custom {
+    color: #F8F8F8;
+    background-color: #485162;
 }
 
-.article-svg {
-  width: 25px;
-  height: 25px;
-  vertical-align: middle;
+.feature {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  width: 3rem;
+  font-size: 1.5rem;
 }
 
-.account-img {
-  height: 125px;
-  width: 125px;
-  margin-right: 20px;
-  margin-bottom: 16px;
+.text-white-custom {
+  color: #F8F8F8;
 }
 
-.account-heading {
-  font-size: 2.5rem;
+.text-white-custom-2 {
+  color: #C9C9C9;
 }
+
+.text-gray-custom {
+  color: #485162;
+}
+
+.nav-dark {
+  color: #C9C9C9;
+}
+

@@ -1,109 +1,110 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="content-section">
-                <legend><b>Draft</b></legend>
-                <div class="card mb-2">
-                    <div class="card-body bg-light pb-2">
-                        <p class="card-text"><small><b>Rankings</b> are based on the <b>Fantasy Points Gap %</b> between a player and their projected positional replacement, and their <b>Priority</b>, which represents 
-                                                    the likelihood a player will be available again to the current team in the following rounds based on <b>ADP</b>. Priority is determined by the following formulas:
-                                                    <ul>
-                                                        <li><b>High:</b> ADP &lt= Pick in the following round</li>
-                                                        <li><b>Medium:</b> Pick in the following round &lt ADP &lt Pick after the following round </li>
-                                                        <li><b>Low:</b> ADP &gt= Pick after the following round</li>
-                                                    </ul>
-                                             </small>
-                        </p>
+    <div class="container px-5 py-5">
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="content-section h-100">
+                    <h4><strong>Draft</strong></h4>
+                    <div class="card">
+                        <div class="card-body bg-light pb-2">
+                            <div class="card-text">
+                                <p>
+                                    <strong>Rankings</strong> are based on: <strong>1)</strong> the <strong>Fantasy Points Gap %</strong> between a player and their projected positional replacement, and <strong>2)</strong> their level of <strong>Urgency</strong>, which represents the likelihood that player will continue to be available by the time the current team picks again. Urgency is determined by the following rules:
+                                </p>
+                                <ul>
+                                    <li><strong>High:</strong> ADP &le; Pick in the following round</li>
+                                    <li><strong>Medium:</strong> Pick in the following round &lt ADP &lt Pick after the following round </li>
+                                    <li><strong>Low:</strong> ADP &ge; Pick after the following round</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                </div>
-             </div>   
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-9 mb-3">
-            <div class="content-section h-100">
-                <h5 id="picklabel" class="border-bottom font-weight-bold p-2">{{ pick_label }}</h5>
-                <div class="form-check form-check-inline">
-                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" data-val="" checked>
-                  <label class="form-check-label" for="inlineRadio1">All</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" data-val="QB">
-                  <label class="form-check-label" for="inlineRadio2">QB</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" data-val="RB">
-                  <label class="form-check-label" for="inlineRadio3">RB</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" data-val="WR">
-                  <label class="form-check-label" for="inlineRadio4">WR</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
-                  <label class="form-check-label" for="inlineRadio5">TE</label>
-                </div>
-                <table id="drafttable" class="table display compact">
-                <div id="positionfilter" class="p-1">
-                </div>
-                    <thead class="">
-                        <tr>
-                            {% for row in headings1 %}
-                            <th scope="col" class="text-center" style="white-space: nowrap">{{ row }}</th>
-                            {% endfor %}
-                            <th></th>
-                        </tr>
-                    </thead>                         
-                </table>
+                 </div>   
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="content-section h-100">
-            <h5 id="teamlabel" class="font-weight-bold mb-3">{{ team_label }}</h5>
-                <table id="teamtable" class="table display compact" style="width:100%">
-                    <thead class="">
-                        <tr>
-                            {% for row in headings3 %}
-                            <th scope="col" class="text-center">{{ row }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                </table>
-            </div>            
-        </div>      
-    </div>
-    <div class="row"> 
-        <div class="col-md-9 mb-3">
-           <div class="content-section h-100">
-               <h5 id="nextpicklabel" class="font-weight-bold">{{ next_pick_label }}</h5>
-               <h6>Projected Replacements</h6>
-               <table id="repltable" class="table display compact" style="width:100%">
-                   <thead class="">
-                       <tr>
-                           {% for row in headings2 %}
-                           <th scope="col" class="text-center">{{ row }}</th>
-                           {% endfor %}
-                       </tr>
-                   </thead>
-               </table>
-           </div> 
-        </div> 
-        <div class="col-md-3 mb-3">
-            <div class="content-section h-100">
-                <h5 id="prevpicklabel" class="font-weight-bold">{{ prev_pick_label }}</h5>
-                <h6 id="prevteamlabel" class="border-bottom pb-2">{{ prev_team_label }}</h6>
-                <div class="d-flex align-items-center flex-column justify-content-center m-auto">
-                    <br><p id="prevplayerlabel">{{ prev_player_label }}</p>
-                    <p id="prevposlabel">{{ prev_pos_label }}</p>
-                    <div>
-                        <button id="undo-btn" class="btn btn-secondary" disabled>Undo</button>
+        <div class="row">
+            <div class="col-md-9 mb-4">
+                <div class="content-section h-100">
+                    <h5 id="picklabel" class="border-bottom fw-bold p-2">{{ pick_label }}</h5>
+                    <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" data-val="" checked>
+                      <label class="form-check-label" for="inlineRadio1">All</label>
                     </div>
-                </div> 
-            </div>        
+                    <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" data-val="QB">
+                      <label class="form-check-label" for="inlineRadio2">QB</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" data-val="RB">
+                      <label class="form-check-label" for="inlineRadio3">RB</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" data-val="WR">
+                      <label class="form-check-label" for="inlineRadio4">WR</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
+                      <label class="form-check-label" for="inlineRadio5">TE</label>
+                    </div>
+                    <table id="drafttable" class="table table-hover table-sm nowrap" style="width:100%">
+                    <div id="positionfilter" class="p-1"></div>
+                        <thead class="thead-custom">
+                            <tr>
+                                {% for row in draft_head %}
+                                <th scope="col" class="text-center">{{ row }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>                         
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="content-section h-100">
+                    <h5 id="teamlabel" class="border-bottom fw-bold p-2">{{ team_label }}</h5>
+                    <table id="teamtable" class="table table-hover table-sm nowrap" style="width:100%">
+                        <thead class="thead-custom">
+                            <tr>
+                                {% for row in team_head %}
+                                <th scope="col" class="text-center">{{ row }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                    </table>
+                </div>            
+            </div>      
         </div>
-    </div>
+        <div class="row"> 
+            <div class="col-md-9 mb-4">
+               <div class="content-section h-100">
+                   <h5 id="nextpicklabel" class="fw-bold">{{ next_pick_label }}</h5>
+                   <h6 class="border-bottom  pb-2">Projected Replacements</h6>
+                   <table id="repltable" class="table table-hover table-sm nowrap" style="width:100%">
+                       <thead class="thead-custom">
+                           <tr>
+                               {% for row in repl_head %}
+                               <th scope="col" class="text-center">{{ row }}</th>
+                               {% endfor %}
+                           </tr>
+                       </thead>
+                   </table>
+               </div> 
+            </div> 
+            <div class="col-md-3 mb-4">
+                <div class="content-section h-100">
+                    <h5 id="prevpicklabel" class="fw-bold">{{ prev_pick_label }}</h5>
+                    <h6 id="prevteamlabel" class="border-bottom pb-2">{{ prev_team_label }}</h6>
+                    <div class="d-flex align-items-center flex-column justify-content-center m-auto">
+                        <br><p id="prevplayerlabel">{{ prev_player_label }}</p>
+                        <p id="prevposlabel">{{ prev_pos_label }}</p>
+                        <div>
+                            <button id="undo-btn" class="btn btn-custom" disabled>Undo</button>
+                        </div>
+                    </div> 
+                </div>        
+            </div>
+        </div>
+    </div>    
 {% endblock content %}
 
 {% block script %}
@@ -112,14 +113,9 @@
                        
              var drafttable = $('#drafttable').DataTable({
                   'scrollY': 365,
+                  'scrollX': true,
                   'paging': false,
                   'info': false,
-                  'responsive': {
-                      'details': {
-                          type: 'column',
-                          target: -1
-                      }
-                  },
                   'ajax': {
                       'url': '/draft_data',
                       'type': 'GET',
@@ -127,12 +123,12 @@
                   },
                   'rowCallback': function ( row, data, index ) {
                         if ( data.vor_pct > 0 ) {
-                        $('td:eq(5)', row).css('color', 'Green');}
+                        $('td:eq(5)', row).css('color', '#00C248');} //38E277
                         else if ( data.vor_pct < 0 ) {
-                        $('td:eq(5)', row).css('color', 'Red');} 
+                        $('td:eq(5)', row).css('color', '#FF2C00');} //FF603F
                   },
                   'columns': [
-                      {defaultContent: '<button class="btn btn-info btn-sm pick-btn" style="padding: 2px 8px;"><b>+</b></button>'},
+                      {defaultContent: '<button class="btn btn-pick"><i class="bi bi-plus-circle-fill"></i></button>'},
                       {data: 'player'},
                       {data: 'position'},
                       {data: 'fantasy_points'},
@@ -140,22 +136,16 @@
                       {data: 'vor_pct'},
                       {data: 'adp'},
                       {data: {
-                          _: 'priority.display',
-                          sort: 'priority.priority'
-                       } },
-                      {defaultContent: ''}
+                          _: 'urgency.display',
+                          sort: 'urgency.urgency'
+                       } }
                   ],
                    'columnDefs': [
                         { orderable: false, targets: 0 },
-                        { className: 'font-weight-bold', targets: 5 },
-                        { render: DataTable.render.number(',', '.', '1'), targets: [3, 4, 5, 6]},
-                        { responsivePriority: 1, targets: [0, 1, 2, 5, 7]},
-                        { responsivePriority: 2, targets: 4 },
-                        { responsivePriority: 3, targets: 3 },
-                        { responsivePriority: 4, targets: 6 },
-                        { className: 'dtr-control', orderable: false, targets: -1 }
+                        { className: 'fw-bold', targets: 5 },
+                        { render: DataTable.render.number(',', '.', '1'), targets: [3, 4, 5, 6]}
                    ],
-                  'order': [[ 7, 'asc' ]]
+                  'order': [[ 7, 'asc' ], [ 5, 'desc' ], [ 6, 'asc' ]]
             
             });
             
@@ -164,10 +154,10 @@
               });         
             
              var repltable = $('#repltable').DataTable({
+                  'scrollX': true,
                   'paging': false,
                   'searching': false,
                   'info': false,
-                  'responsive': true,
                   'ajax': {
                       'url': '/draft_data',
                       'type': 'GET',
@@ -187,10 +177,10 @@
             
              var teamtable = $('#teamtable').DataTable({
                   'scrollY': 450,
+                  'scrollX': true,
                   'paging': false,
                   'searching': false,
                   'info': false,
-                  'responsive': true,
                   'language': {'emptyTable': 'No players selected'},
                   'ajax': {
                       'url': '/draft_data',
@@ -202,12 +192,11 @@
                       {data: 'player'}
                       ],
                   'columnDefs': [
-                        {'width':'30%', targets: 0},
-                        { responsivePriority: 1, targets: 1 }
+                        {'width':'30%', targets: 0}
                       ]
             });
             
-        $('#drafttable tbody').on('click', '.pick-btn', function() {
+        $('#drafttable tbody').on('click', '.btn-pick', function() {
             var data = drafttable.row($(this).parents('tr')).data();
             var player = data.player;
             var position = data.position;
@@ -219,24 +208,33 @@
                 data: {'player' : player, 'position' : position, 'fantasy_points': fantasy_points}
             });
             
-            $('.pick-btn').attr("disabled", true);
+            $('.btn-pick').attr("disabled", true);
             $('#undo-btn').attr("disabled", true);
             
             req.done(function(data) {
                 if (data.pick_num > 1) {
                     $('#undo-btn').attr("disabled", false);                   
-                    } else {
+                } else {
                     $('#undo-btn').attr("disabled", true);
                     };
-                if (data.pick_num > data.total_picks) {
+                if (data.pick_num > Math.min(data.total_players, data.total_picks)) {
                     alert( 'That was the last pick of the draft. Good luck!' );
                     var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
                     $("body").append($form);
-                    $form.submit();                    
-                    } else {
-                         drafttable.ajax.reload();
-                         repltable.ajax.reload();
-                         teamtable.ajax.reload();
+                    $form.submit();                   
+                } else {
+                         // drafttable.ajax.reload();
+                         // repltable.ajax.reload();
+                         // teamtable.ajax.reload();
+                         drafttable.clear();
+                         drafttable.rows.add(data.draftdata);
+                         drafttable.draw();
+                         repltable.clear();
+                         repltable.rows.add(data.repldata);
+                         repltable.draw();
+                         teamtable.clear();
+                         teamtable.rows.add(data.teamdata);
+                         teamtable.draw();
                          $('#picklabel').text(data.pick_label);
                          $('#nextpicklabel').text(data.next_pick_label);
                          $('#teamlabel').text(data.team_label);
@@ -244,9 +242,8 @@
                          $('#prevteamlabel').text(data.prev_team_label);
                          $('#prevplayerlabel').text(data.prev_player_label);
                          $('#prevposlabel').text(data.prev_pos_label);
-                     };
+                    };
                  });
-
             });
             
         $('#undo-btn').on('click', function() {            
@@ -255,18 +252,27 @@
                 type: 'POST'
             });
             
-            $('.pick-btn').attr("disabled", true);
+            $('.btn-pick').attr("disabled", true);
             $('#undo-btn').attr("disabled", true);
             
             req.done(function(data) {
                 if (data.pick_num > 1) {
                     $('#undo-btn').attr("disabled", false);                   
-                    } else {
+                } else {
                     $('#undo-btn').attr("disabled", true);
                     };
-                drafttable.ajax.reload();
-                repltable.ajax.reload();
-                teamtable.ajax.reload();
+                // drafttable.ajax.reload();
+                // repltable.ajax.reload();
+                // teamtable.ajax.reload();
+                drafttable.clear();
+                drafttable.rows.add(data.draftdata);
+                drafttable.draw();
+                repltable.clear();
+                repltable.rows.add(data.repldata);
+                repltable.draw();
+                teamtable.clear();
+                teamtable.rows.add(data.teamdata);
+                teamtable.draw();
                 $('#picklabel').text(data.pick_label);
                 $('#nextpicklabel').text(data.next_pick_label);
                 $('#teamlabel').text(data.team_label);
@@ -275,9 +281,7 @@
                 $('#prevplayerlabel').text(data.prev_player_label);
                 $('#prevposlabel').text(data.prev_pos_label);
                  });
-
             });
-            
         });
     </script>
 {% endblock script %}
