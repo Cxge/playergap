@@ -1,29 +1,31 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="content-section">
-                <h5 class="border-bottom fw-bold p-2">Draft Results</h5>
-                <div id="teamfilter" class="p-2 d-flex justify-content-center">Team:&nbsp;&nbsp;</div>
-                <table id="resultstable" class="table table-hover table-sm nowrap" style="width:100%">
-                    <thead class="thead-custom">
-                        <tr>
-                            {% for row in result_head %}
-                            <th scope="col" class="text-center">{{ row }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            {% for row in result_head[:-2] %}
-                            <th></th>
-                            {% endfor %}
-                            <th class="text-center">Total: </th>
-                            <th id="total"></th>
-                        </tr>
-                    </tfoot>
-                </table>
+    <div class="container px-5 py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <div class="content-section">
+                    <h4 class="border-bottom fw-bold p-2">Draft Results</h4>
+                    <div id="teamfilter" class="p-2 d-flex justify-content-center">Team:&nbsp;&nbsp;</div>
+                    <table id="resultstable" class="table table-hover table-sm nowrap" style="width:100%">
+                        <thead class="thead-custom">
+                            <tr>
+                                {% for row in result_head %}
+                                <th scope="col" class="text-center">{{ row }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                {% for row in result_head[:-2] %}
+                                <th></th>
+                                {% endfor %}
+                                <th class="text-center">Total: </th>
+                                <th id="total"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

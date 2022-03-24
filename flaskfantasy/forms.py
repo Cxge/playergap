@@ -28,7 +28,7 @@ class SettingsForm(FlaskForm):
                                      validators=[DataRequired()],
                                      choices=[])
     
-    adp_source = SelectField('ADP data source',
+    adp_source = SelectField('ADP source',
                              validators=[DataRequired()],
                              choices=[])
     

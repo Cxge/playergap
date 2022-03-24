@@ -8,6 +8,10 @@ body {
   color: #485162;
 }
 
+a { 
+  text-decoration: none;
+}
+
 td {
   vertical-align: middle;
 }

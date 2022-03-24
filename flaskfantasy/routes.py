@@ -60,7 +60,9 @@ def contact():
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
     form = SettingsForm()
-    choices = ['All (Average)'] + [src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system=='1-QB', Adp.scoring=='Half-PPR', Adp.source_name!='FantasyPros-FFC').distinct()]
+    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system=='1-QB', 
+        Adp.scoring=='Half-PPR', Adp.source_name!='FantasyPros-FFC').distinct()], key=str.casefold)
+    choices = ['All (Average)'] + choices
     #choices = list(dict.fromkeys(choices)) #We have FFC and FantasyPros-FFC, so we need to remove duplicates after replacing 'FantasyPros-' for ''
     form.adp_source.choices = choices
     if form.validate_on_submit():
@@ -342,8 +344,8 @@ def num_rounds(system):
 
 @app.route("/settings/adp_sources/<system>/<scoring>")
 def adp_sources(system, scoring):
-    choices = [src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system==system, 
-        Adp.scoring==scoring, Adp.season==2021).distinct()]
+    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system==system, 
+        Adp.scoring==scoring, Adp.source_name!='FantasyPros-FFC').distinct()], key=str.casefold)
     if system == '1-QB':
         choices = ['All (Average)'] + choices
     return jsonify({'adp_sources': choices})
