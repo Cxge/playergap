@@ -1,0 +1,313 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"margin",
+				"margin-bottom"
+			],
+			[
+				"bor",
+				"border"
+			],
+			[
+				"inlin",
+				"inline-block"
+			],
+			[
+				"adp",
+				"adp_sources"
+			],
+			[
+				"sco",
+				"scoring_format"
+			],
+			[
+				"s",
+				"source_name"
+			],
+			[
+				"back",
+				"background-color"
+			],
+			[
+				"margi",
+				"margin-bottom"
+			],
+			[
+				"fle",
+				"flex-wrap"
+			],
+			[
+				"inl",
+				"inline-block"
+			],
+			[
+				"leag",
+				"leagueID"
+			],
+			[
+				"rec",
+				"record_str"
+			],
+			[
+				"token",
+				"token_info"
+			],
+			[
+				"BASE",
+				"BASE_URL_2"
+			],
+			[
+				"print",
+				"print_response"
+			],
+			[
+				"inde",
+				"INDENT"
+			],
+			[
+				"hea",
+				"HEADERS"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 130.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/static/main.css",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/templates/results.html",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/templates/contact.html",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/templates/settings.html",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/routes.py",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/__init__.py",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/run.py",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/templates/layout.html",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/forms.py",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/templates/index.html",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy/templates/draft.html",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/MEM_Basico/index.html",
+		"/C/Users/Ernesto Cortés/Downloads/startbootstrap-modern-business-gh-pages/startbootstrap-modern-business-gh-pages/index.html",
+		"/C/Users/Ernesto Cortés/Downloads/startbootstrap-modern-business-gh-pages/startbootstrap-modern-business-gh-pages/css/styles.css",
+		"/C/Users/Ernesto Cortés/Downloads/startbootstrap-modern-business-gh-pages/startbootstrap-modern-business-gh-pages/about.html",
+		"/C/Users/Ernesto Cortés/Downloads/robotfriend/style.css",
+		"/C/Users/Ernesto Cortés/Downloads/robotfriend/index.html",
+		"/C/Users/Ernesto Cortés/Downloads/robot/index.html",
+		"/C/Users/Ernesto Cortés/Downloads/robot/style.css",
+		"/C/Users/Ernesto Cortés/MyPythonScripts/Flask_Fantasy/flaskfantasy.py",
+		"/D/MyScripts/Flask_Fantasy/flaskfantasy.py",
+		"/D/MyScripts/FlaskFantasy/flaskfantasy.py",
+		"/D/MyScripts/webscraping.py",
+		"/D/MyScripts/YoutubeAPI.py",
+		"/D/MyScripts/TwitchAPI.py"
+	],
+	"find":
+	{
+		"height": 27.0
+	},
+	"find_in_files":
+	{
+		"height": 101.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"{\n",
+			"postgres",
+			"['",
+			"cols",
+			"draftdata",
+			"lst_picks_ov",
+			"num_teams",
+			"home",
+			"index",
+			"home",
+			"form-group",
+			"BeginForm",
+			"adp_source_select",
+			"prio",
+			"priority",
+			"FFFFFF",
+			"feature",
+			";\n",
+			"important",
+			"--bs-gradient",
+			"background-image",
+			"bg-gradient",
+			"feature",
+			"--bs-primary-rgb",
+			"bg-primary",
+			"bg-gradient",
+			"bi",
+			"bi ",
+			"bi-",
+			"bi",
+			"12",
+			"header",
+			"ffffff",
+			"pick-btn",
+			"HOME",
+			"priority",
+			"\">",
+			"center",
+			"left",
+			"main.css",
+			"drafttable",
+			"font",
+			"respons",
+			"headings3",
+			"responsive",
+			"    <link rel=\"stylesheet\" href=\"https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css\">\n    <link rel=\"stylesheet\" href=\"https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css\">",
+			"home.html",
+			"style",
+			"content",
+			"card",
+			"mb",
+			"b>"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"strong>"
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 39.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "run.sublime-project",
+	"replace":
+	{
+		"height": 50.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 323.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 592.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 279.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

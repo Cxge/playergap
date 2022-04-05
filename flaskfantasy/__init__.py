@@ -1,5 +1,4 @@
 import os
-
 import redis
 from flask import Flask
 from flask_mail import Mail
@@ -37,5 +36,8 @@ app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_REDIS'] = redis.from_url(os.environ.get('REDIS_URL'))
 server_session = Session(app)
 
+# Configure reCAPTCHA v2
+app.config['RECAPTCHA_PUBLIC_KEY'] = os.environ.get('RECAPTCHA_PUBLIC')
+app.config['RECAPTCHA_PRIVATE_KEY'] = os.environ.get('RECAPTCHA_PRIVATE')
 
 from flaskfantasy import routes

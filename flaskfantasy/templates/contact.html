@@ -43,6 +43,9 @@
                                 {{ form.message.label(class="form-label") }}
                                 {{ form.message(class="form-control", rows="10") }}
                             </div>
+                            <div class="mb-3">
+                                {{ form.recaptcha(class="form-control") }}
+                            </div>                            
                         </fieldset>
                         <div>
                             {{ form.send(class="btn btn-custom") }}
