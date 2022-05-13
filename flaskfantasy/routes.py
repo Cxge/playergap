@@ -27,7 +27,6 @@ def ranking(dfDraft, pick_num, next_pick_in):
             dict_pos[key] = 0
     dfDraft['vor_pts'] = dfDraft.apply(lambda row: row['fantasy_points'] - dict_pos.get(row['position']), axis=1).round(1)
     dfDraft['vor_pct'] = dfDraft.apply(lambda row: 9999.9 if dict_pos.get(row['position']) == 0 else (row['fantasy_points'] - dict_pos.get(row['position'])) / dict_pos.get(row['position']) * 100, axis=1).round(1)
-    #dfTopPlayersAvail = dfDraft.sort_values(by='vor_pct', ascending=False)[['player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
     dfTopPlayersAvail = dfDraft[['player', 'position', 'adp', 'fantasy_points', 'vor_pts', 'vor_pct']]
     dfTopPlayersAvail['urgency'] = dfTopPlayersAvail.apply(lambda x: urgency(x['adp'], pick_num, next_pick_in), axis=1)
     draftdata = dfTopPlayersAvail[['player', 'position', 'fantasy_points', 'vor_pts', 'vor_pct', 'adp', 'urgency']].to_dict(orient='records')
@@ -60,10 +59,9 @@ def contact():
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
     form = SettingsForm()
-    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system=='1-QB', 
-        Adp.scoring=='Half-PPR', Adp.source_name!='FantasyPros-FFC').distinct()], key=str.casefold)
+    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.season==2022, Adp.system=='1-QB', 
+        Adp.scoring=='Half-PPR').distinct()], key=str.casefold)
     choices = ['All (Average)'] + choices
-    #choices = list(dict.fromkeys(choices)) #We have FFC and FantasyPros-FFC, so we need to remove duplicates after replacing 'FantasyPros-' for ''
     form.adp_source.choices = choices
     if form.validate_on_submit():
         return redirect(url_for('draft'))
@@ -74,6 +72,7 @@ def settings():
 def draft():
     if request.method == 'POST':      
         session.clear()
+        season = 2022
         system = request.form['system']
         scoring_format = request.form['scoring_format']
         num_teams = int(request.form['num_teams'])
@@ -113,13 +112,14 @@ def draft():
                             INNER JOIN (
                                 SELECT source_name, MAX(source_update) AS source_update
                                 FROM adp 
-                                WHERE system = '{system}'
+                                WHERE season = {season} 
+                                AND system = '{system}'
                                 AND scoring = '{scoring_format}'
-                                AND source_name != 'FantasyPros-FFC'
                                 GROUP BY source_name
                             ) B
                             ON A.source_name = B.source_name AND A.source_update = B.source_update
-                            WHERE system = '{system}'
+                            WHERE season = {season} 
+                            AND system = '{system}'
                             AND scoring = '{scoring_format}'
                             GROUP BY A.player, A.position
             """
@@ -127,14 +127,16 @@ def draft():
         else:
             adp_query = f"""SELECT player, position, adp
                              FROM adp
-                             WHERE system = '{system}'
+                             WHERE season = {season} 
+                             AND system = '{system}'
                              AND scoring = '{scoring_format}'
-                             AND source_name = '{adp_source if adp_source in ['FFC', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
+                             AND source_name = '{adp_source if adp_source in ['FantasyFootballCalculator', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
                              AND source_update = (SELECT MAX(source_update) 
                                                      FROM adp 
-                                                     WHERE system = '{system}'
+                                                     WHERE season = {season} 
+                                                     AND system = '{system}'
                                                      AND scoring = '{scoring_format}'
-                                                     AND source_name = '{adp_source if adp_source in ['FFC', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
+                                                     AND source_name = '{adp_source if adp_source in ['FantasyFootballCalculator', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
                                                  )
             """
 
@@ -193,7 +195,8 @@ def draft():
                                     + receiv_td  * {format_values[scoring_format][7]} 
                                     + fumble_lst * {format_values[scoring_format][8]} AS fantasy_points
                         FROM projections
-                        WHERE source_name = 'FantasyPros'
+                        WHERE season = {season} 
+                        AND source_name = 'FantasyPros'
                         AND position NOT IN ('DST', 'K')
                         AND source_update = (SELECT MAX(source_update) FROM projections WHERE source_name = 'FantasyPros')
             ) A
@@ -338,14 +341,14 @@ def num_rounds(system):
     elif system == 'Dynasty':    
         choices = [*range(20, 31)]
     else:
-        choices = [*range(15, 21)]
+        choices = [*range(10, 17)]
     return jsonify({'num_rounds': choices})
 
 
 @app.route("/settings/adp_sources/<system>/<scoring>")
 def adp_sources(system, scoring):
-    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.system==system, 
-        Adp.scoring==scoring, Adp.source_name!='FantasyPros-FFC').distinct()], key=str.casefold)
+    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.season==2022, Adp.system==system, 
+        Adp.scoring==scoring).distinct()], key=str.casefold)
     if system == '1-QB':
         choices = ['All (Average)'] + choices
     return jsonify({'adp_sources': choices})

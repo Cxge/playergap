@@ -21,8 +21,8 @@ class SettingsForm(FlaskForm):
     
     roster_size = SelectField('Roster size',
                               validators=[DataRequired()],
-                              choices=[i for i in range(15, 21)],
-                              default=15)
+                              choices=[i for i in range(10, 17)],
+                              default=13)
     
     projections_source = SelectField('FPts projections data source',
                                      validators=[DataRequired()],

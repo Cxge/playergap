@@ -196,13 +196,17 @@ def fantasyfootballcalc_adp(season):
         response = get(f'https://fantasyfootballcalculator.com/api/v1/adp/{scoring[sc]}?teams=12&year={season}')
         if response.ok:
             packages_json = response.json()
-            update = packages_json['meta']['end_date']
-            update = datetime.strptime(update, '%Y-%m-%d')
-            df = pd.DataFrame.from_dict(packages_json['players'])
-            df['scoring'] = sc
-            df['system'] = '1-QB'
-            df['source_update'] = update
-            df_final = pd.concat([df_final, df])
+            if packages_json['status'] == 'Success':
+                update = packages_json['meta']['end_date']
+                update = datetime.strptime(update, '%Y-%m-%d')
+                df = pd.DataFrame.from_dict(packages_json['players'])
+                df['scoring'] = sc
+                df['system'] = '1-QB'
+                df['source_update'] = update
+                df_final = pd.concat([df_final, df])
+            else:
+                print(packages_json['errors'])
+                return
         else:
             print('Oops, something didn\'t work right', response.status_code)
             return
