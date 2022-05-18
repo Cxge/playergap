@@ -47,6 +47,10 @@
                       <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" data-val="TE">
                       <label class="form-check-label" for="inlineRadio5">TE</label>
                     </div>
+                    <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio6" data-val="RB|WR|TE">
+                      <label class="form-check-label" for="inlineRadio6">Flex</label>
+                    </div>
                     <div id="positionfilter" class="p-1"></div>
                     <table id="drafttable" class="table table-hover table-sm nowrap" style="width:100%">
                         <thead class="thead-custom">
@@ -150,7 +154,7 @@
             });
             
             $('.search').click(function() {
-                drafttable.column(2).search($(this).data('val')).draw();
+                drafttable.column(2).search($(this).data('val'), true, false).draw();
             });         
             
             var repltable = $('#repltable').DataTable({

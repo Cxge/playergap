@@ -1,48 +1,88 @@
 from flask_wtf import FlaskForm, RecaptchaField
-from wtforms import SelectField, SubmitField, StringField, TextAreaField
-from wtforms.validators import DataRequired, Email
+from wtforms import SelectField, SubmitField, StringField, TextAreaField, DecimalField
+from wtforms.validators import InputRequired
 
 
 class SettingsForm(FlaskForm):
     system = SelectField('System',
-                         validators=[DataRequired()],
+                         validators=[InputRequired()],
                          choices=['1-QB', '2-QB', 'Dynasty', 'Rookie'],
                          default='1-QB')
     
     scoring_format = SelectField('Scoring format',
-                                 validators=[DataRequired()],
+                                 validators=[InputRequired()],
                                  choices=['PPR', 'Half-PPR', 'Non-PPR'],
                                  default='Half-PPR')
+
+    projections_source = SelectField('FPts projections data source',
+                                     validators=[InputRequired()],
+                                     choices=[])
+    
+    adp_source = SelectField('ADP source',
+                             validators=[InputRequired()],
+                             choices=[])
     
     num_teams = SelectField('Number of teams',
-                            validators=[DataRequired()],
+                            validators=[InputRequired()],
                             choices=[8, 10, 12, 14, 16],
                             default=12)
     
     roster_size = SelectField('Roster size',
-                              validators=[DataRequired()],
+                              validators=[InputRequired()],
                               choices=[i for i in range(10, 17)],
                               default=13)
-    
-    projections_source = SelectField('FPts projections data source',
-                                     validators=[DataRequired()],
-                                     choices=[])
-    
-    adp_source = SelectField('ADP source',
-                             validators=[DataRequired()],
-                             choices=[])
+
+    pass_yd = DecimalField('Passing yards',
+                            validators=[InputRequired()],
+                            default=25,
+                            places=0)
+
+    pass_td = DecimalField('Passing touchdown',
+                            validators=[InputRequired()],
+                            default=4,
+                            places=0)
+
+    pass_int = DecimalField('Interception thrown',
+                            validators=[InputRequired()],
+                            default=-2,
+                            places=0)
+
+    rush_yd = DecimalField('Rushing yards',
+                            validators=[InputRequired()],
+                            default=10,
+                            places=0)
+
+    rush_td = DecimalField('Rushing touchdown',
+                            validators=[InputRequired()],
+                            default=6,
+                            places=0)
+
+    receiv_yd = DecimalField('Receiving yards',
+                            validators=[InputRequired()],
+                            default=10,
+                            places=0)
+
+    receiv_td = DecimalField('Receiving touchdown',
+                            validators=[InputRequired()],
+                            default=6,
+                            places=0)
+
+    fumble_lst = DecimalField('Fumble lost',
+                            validators=[InputRequired()],
+                            default=-2,
+                            places=0)
     
     save_settings = SubmitField('Next')
 
 
 class ContactForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    name = StringField('Name', validators=[InputRequired()])
     
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[InputRequired()])
     
-    subject = StringField('Subject', validators=[DataRequired()])
+    subject = StringField('Subject', validators=[InputRequired()])
     
-    message = TextAreaField('Message', validators=[DataRequired()])
+    message = TextAreaField('Message', validators=[InputRequired()])
 
     recaptcha = RecaptchaField()
     

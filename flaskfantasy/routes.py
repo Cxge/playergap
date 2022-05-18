@@ -75,10 +75,23 @@ def draft():
         season = 2022
         system = request.form['system']
         scoring_format = request.form['scoring_format']
-        num_teams = int(request.form['num_teams'])
-        roster_size = int(request.form['roster_size']) + 2 #Two extra rounds, so we have something to compare to in the last round
         # projections_source = request.form['projections_source']
         adp_source = request.form['adp_source']
+        num_teams = int(request.form['num_teams'])
+        roster_size = int(request.form['roster_size']) + 2 #Two extra rounds, so we have something to compare to in the last round
+
+        receiv_rec_dict = {'Half-PPR':0.5, 'PPR':1, 'Non-PPR':0}
+
+        pass_yd = float(request.form['pass_yd'])
+        pass_td = float(request.form['pass_td'])
+        pass_int = float(request.form['pass_int'])
+        rush_yd = float(request.form['rush_yd'])
+        rush_td = float(request.form['rush_td'])
+        receiv_rec = receiv_rec_dict[scoring_format]
+        receiv_yd = float(request.form['receiv_yd'])
+        receiv_td = float(request.form['receiv_td'])
+        fumble_lst = float(request.form['fumble_lst'])
+
         pick_num = 1
         dfRoster = pd.DataFrame(data=[['', '', '', '', '']], columns=['team', 'pick', 'player', 'position', 'fantasy_points'])
 
@@ -98,10 +111,6 @@ def draft():
                 team_picking += reversed(range(1, num_teams + 1))
             else:
                 team_picking += range(1, num_teams + 1)
-        
-        format_values = {'Half-PPR':[0.04, 4, -2, 0.1, 6, 0.5, 0.1, 6, -2],
-                         'PPR':     [0.04, 4, -2, 0.1, 6, 1,   0.1, 6, -2],
-                         'Non-PPR': [0.04, 4, -2, 0.1, 6, 1,   0.1, 6, -2]}
         
         how_join = 'RIGHT' if system == 'Rookie' else 'LEFT'
         col_join = 'B.player, B.position, A.fantasy_points, B.adp' if system == 'Rookie' else 'A.player, A.position, A.fantasy_points, B.adp'
@@ -185,15 +194,15 @@ def draft():
         query = f"""
         SELECT {col_join}
         FROM        
-            (SELECT player, position, pass_yd    * {format_values[scoring_format][0]}
-                                    + pass_td    * {format_values[scoring_format][1]}
-                                    + pass_int   * {format_values[scoring_format][2]}
-                                    + rush_yd    * {format_values[scoring_format][3]}
-                                    + rush_td    * {format_values[scoring_format][4]}
-                                    + receiv_rec * {format_values[scoring_format][5]}
-                                    + receiv_yd  * {format_values[scoring_format][6]}
-                                    + receiv_td  * {format_values[scoring_format][7]} 
-                                    + fumble_lst * {format_values[scoring_format][8]} AS fantasy_points
+            (SELECT player, position, pass_yd    / {pass_yd}
+                                    + pass_td    * {pass_td}
+                                    + pass_int   * {pass_int}
+                                    + rush_yd    / {rush_yd}
+                                    + rush_td    * {rush_td}
+                                    + receiv_rec * {receiv_rec}
+                                    + receiv_yd  / {receiv_yd}
+                                    + receiv_td  * {receiv_td} 
+                                    + fumble_lst * {fumble_lst} AS fantasy_points
                         FROM projections
                         WHERE season = {season} 
                         AND source_name = 'FantasyPros'
