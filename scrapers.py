@@ -141,7 +141,8 @@ def fantasypros_adp(season):
             df['position'] = df['POS'].apply(lambda x: ''.join([i for i in x if not i.isdigit()]))  # Removes the positional ranking
             df.drop(['Rank', 'Player Team (Bye)', 'POS', 'AVG'], axis=1, inplace=True)
             df = pd.melt(df, id_vars=['player', 'position', 'team'], var_name='source_name', value_name='adp')
-            df['source_name'] = 'FantasyPros-' + df['source_name']
+            df['source_name'] = df['source_name']
+            df = df.loc[df['source_name'] != 'FFC']
             df = df.loc[df['adp'].notnull()]
             df['scoring'] = sc
             df['system'] = '1-QB'
@@ -235,7 +236,7 @@ def fantasyfootballcalc_adp(season):
     df_final.rename(columns={'name': 'player'}, inplace=True)
     cols = ['player', 'position', 'team', 'adp', 'scoring', 'system', 'season', 'source_update']
     df_final = df_final[cols]
-    df_final['source_name'] = 'FantasyFootballCalculator'
+    df_final['source_name'] = 'FFC'
     df_final['insert_timestamp'] = datetime.utcnow()
     engine = create_engine('postgresql://{user}:{password}@{host}:{port}/{database}'
                            .format(user='postgres',

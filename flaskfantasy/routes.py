@@ -59,7 +59,7 @@ def contact():
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
     form = SettingsForm()
-    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.season==2022, Adp.system=='1-QB', 
+    choices = sorted([src.source_name for src in Adp.query.with_entities(Adp.source_name).filter(Adp.season==2022, Adp.system=='1-QB', 
         Adp.scoring=='Half-PPR').distinct()], key=str.casefold)
     choices = ['All (Average)'] + choices
     form.adp_source.choices = choices
@@ -139,13 +139,13 @@ def draft():
                              WHERE season = {season} 
                              AND system = '{system}'
                              AND scoring = '{scoring_format}'
-                             AND source_name = '{adp_source if adp_source in ['FantasyFootballCalculator', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
+                             AND source_name = '{adp_source}'
                              AND source_update = (SELECT MAX(source_update) 
                                                      FROM adp 
                                                      WHERE season = {season} 
                                                      AND system = '{system}'
                                                      AND scoring = '{scoring_format}'
-                                                     AND source_name = '{adp_source if adp_source in ['FantasyFootballCalculator', 'FantasyPros'] else 'FantasyPros-'+adp_source}'
+                                                     AND source_name = '{adp_source}'
                                                  )
             """
 
@@ -356,7 +356,7 @@ def num_rounds(system):
 
 @app.route("/settings/adp_sources/<system>/<scoring>")
 def adp_sources(system, scoring):
-    choices = sorted([src.source_name.replace('FantasyPros-', '') for src in Adp.query.with_entities(Adp.source_name).filter(Adp.season==2022, Adp.system==system, 
+    choices = sorted([src.source_name for src in Adp.query.with_entities(Adp.source_name).filter(Adp.season==2022, Adp.system==system, 
         Adp.scoring==scoring).distinct()], key=str.casefold)
     if system == '1-QB':
         choices = ['All (Average)'] + choices
