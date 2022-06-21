@@ -126,9 +126,9 @@
                     'dataSrc': 'draftdata'
                 },
                 'rowCallback': function ( row, data, index ) {
-                    if ( data.vor_pct > 0 ) {
+                    if ( data.gap_pct > 0 ) {
                         $('td:eq(5)', row).css('color', '#00C248');} //38E277
-                    else if ( data.vor_pct < 0 ) {
+                    else if ( data.gap_pct < 0 ) {
                         $('td:eq(5)', row).css('color', '#FF2C00');} //FF603F
                 },
                 'columns': [
@@ -136,8 +136,8 @@
                     {data: 'player'},
                     {data: 'position'},
                     {data: 'fantasy_points'},
-                    {data: 'vor_pts'},
-                    {data: 'vor_pct'},
+                    {data: 'gap_pts'},
+                    {data: 'gap_pct'},
                     {data: 'adp'},
                     {data: 
                         {_: 'urgency.display',
@@ -247,7 +247,7 @@
                 });
             });
                 
-            $('#undo-btn').on('click', function() {            
+            $('#undo-btn').on('click', function() {
                 req = $.ajax({
                     url: '/draft_data',
                     type: 'POST'
