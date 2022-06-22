@@ -278,7 +278,7 @@ def draft_data():
     next_pick_in = session['state'].picks_until_next
     replacements = []
     for pos in ['QB', 'WR', 'RB', 'TE']:
-        replacement = next((r for r in free_agents[next_pick_in[pick_num - 1]:] if r.position == pos), NflPlayer('N/A', pos, 999.9, 0))
+        replacement = next((r for r in free_agents[next_pick_in[pick_num - 1]-1:] if r.position == pos), NflPlayer('N/A', pos, 999.9, 0))
         replacements.append(replacement) 
     free_agents = [p.calc_urgency(pick_num, next_pick_in).calc_gap(replacements).__dict__ for p in free_agents]
     replacements = [r.__dict__ for r in replacements]
