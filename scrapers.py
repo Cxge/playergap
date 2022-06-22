@@ -231,7 +231,7 @@ def fantasyfootballcalc_adp(season):
     df_final['name'].replace(r'\s(?:I+|IV|V|VI|VI+|IX|X|Jr\.|Jr)$', '', regex=True, inplace=True)
     #df_final['name'] = np.where(df_final['name'].str.contains(r'^[A-Z]{2}\s'), df_final['name'].apply(lambda x: '.'.join(x.split(' ')[0]) + '. ' + ' '.join(x.split(' ')[1:])), df_final['name'])
     df_final['name'].replace('\.', '', regex=True, inplace=True)
-    df_final['name'].replace('Pat Mahomes', 'Patrick Mahomes', inplace=True)
+    df_final['name'].replace({'Pat Mahomes':'Patrick Mahomes', 'Kenneth Walker':'Ken Walker'}, inplace=True)
     df_final['season'] = season
     df_final.rename(columns={'name': 'player'}, inplace=True)
     cols = ['player', 'position', 'team', 'adp', 'scoring', 'system', 'season', 'source_update']

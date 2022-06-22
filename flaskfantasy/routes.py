@@ -94,7 +94,7 @@ class NflPlayer:
     def calc_gap(self, replacements):
         replacement = next(r for r in replacements if r.position == self.position)
         self.gap_pts = self.fantasy_points - replacement.fantasy_points
-        self.gap_pct = (self.fantasy_points - replacement.fantasy_points) / replacement.fantasy_points * 100
+        self.gap_pct = (self.fantasy_points - replacement.fantasy_points) / replacement.fantasy_points * 100 if replacement.fantasy_points > 0 else 9999.9
         return self
 
 
@@ -189,6 +189,7 @@ def draft():
                             WHERE season = {season} 
                             AND system = '{system}'
                             AND scoring = '{scoring_format}'
+                            AND position NOT IN ('K')
                             GROUP BY A.player, A.position
             """
 
@@ -198,6 +199,7 @@ def draft():
                              WHERE season = {season} 
                              AND system = '{system}'
                              AND scoring = '{scoring_format}'
+                             AND position NOT IN ('K')
                              AND source_name = '{adp_source}'
                              AND source_update = (SELECT MAX(source_update) 
                                                      FROM adp 
@@ -276,8 +278,8 @@ def draft_data():
     next_pick_in = session['state'].picks_until_next
     replacements = []
     for pos in ['QB', 'WR', 'RB', 'TE']:
-        replacement = next(r for r in free_agents[next_pick_in[pick_num - 1]:] if r.position == pos)
-        replacements.append(replacement)
+        replacement = next((r for r in free_agents[next_pick_in[pick_num - 1]:] if r.position == pos), NflPlayer('N/A', pos, 999.9, 0))
+        replacements.append(replacement) 
     free_agents = [p.calc_urgency(pick_num, next_pick_in).calc_gap(replacements).__dict__ for p in free_agents]
     replacements = [r.__dict__ for r in replacements]
     roster = [p.__dict__ for p in session['state'].rosters[session['state'].team_pick - 1]]
