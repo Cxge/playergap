@@ -10,12 +10,12 @@
                         <div class="card-body bg-light pb-2">
                             <div class="card-text">
                                 <p>
-                                    <strong>Rankings</strong> are based on: <strong>1)</strong> the <strong>Fantasy Points Gap %</strong> between a player and their projected positional replacement, and <strong>2)</strong> their level of <strong>Urgency</strong>, which represents the likelihood that player will continue to be available by the time the current team picks again. Urgency is determined by the following rules:
+                                    <strong>Rankings</strong> are based on the <strong>Fantasy Points Gap %</strong> between a player and their projected positional replacement of the following round, and their level of <strong>Urgency</strong>, which represents the likelihood a player will be selected before your next pick. Urgency is determined by the following rules:
                                 </p>
                                 <ul>
-                                    <li><strong>High:</strong> ADP &le; Pick in the following round</li>
-                                    <li><strong>Medium:</strong> Pick in the following round &lt ADP &lt Pick after the following round </li>
-                                    <li><strong>Low:</strong> ADP &ge; Pick after the following round</li>
+                                    <li><strong>High</strong> if the player is projected to be selected before your next pick</li>
+                                    <li><strong>Medium</strong> if the player is projected to be selected after your next pick, but before your pick two rounds for now</li>
+                                    <li><strong>Low</strong> if the player is projected to be selected after your pick two rounds from now</li>
                                 </ul>
                             </div>
                         </div>
@@ -113,18 +113,30 @@
 
 {% block script %}
     <script>
-        $(document).ready(function(){     
-                       
-            var drafttable = $('#drafttable').DataTable({
+        var draftdata = [];
+        var repldata = [];
+        var teamdata = [];
+        function ajax() {
+            return $.ajax({
+                url: "/draft_data",
+                success : function(data) {
+                    draftdata = data.draftdata;
+                    repldata = data.repldata;
+                    teamdata = data.teamdata;
+                },
+                type: "GET"
+            });
+        }
+
+        $(document).ready(function(){
+
+            $.when(ajax()).done(function() {
+                var drafttable = $('#drafttable').DataTable({
                 'scrollY': 365,
                 'scrollX': true,
                 'paging': false,
                 'info': false,
-                'ajax': {
-                    'url': '/draft_data',
-                    'type': 'GET',
-                    'dataSrc': 'draftdata'
-                },
+                'data': draftdata,
                 'rowCallback': function ( row, data, index ) {
                     if ( data.gap_pct > 0 ) {
                         $('td:eq(5)', row).css('color', '#00C248');} //38E277
@@ -151,22 +163,18 @@
                     { render: DataTable.render.number(',', '.', '1'), targets: [3, 4, 5, 6]}
                 ],
                 'order': [[ 7, 'asc' ], [ 5, 'desc' ], [ 6, 'asc' ]]
-            });
-            
-            $('.search').click(function() {
+                });
+
+                $('.search').click(function() {
                 drafttable.column(2).search($(this).data('val'), true, false).draw();
-            });         
-            
-            var repltable = $('#repltable').DataTable({
+                });
+
+                var repltable = $('#repltable').DataTable({
                 'scrollX': true,
                 'paging': false,
                 'searching': false,
                 'info': false,
-                'ajax': {
-                    'url': '/draft_data',
-                    'type': 'GET',
-                    'dataSrc': 'repldata'
-                },
+                'data': repldata,
                 'columns': [
                     {data: 'player'},
                     {data: 'position'},
@@ -177,20 +185,16 @@
                     { render: DataTable.render.number(',', '.', '1'), targets: [2, 3] }
                 ],
                 'order': [[ 1, 'asc' ]]
-            });
+                });
             
-            var teamtable = $('#teamtable').DataTable({
+                var teamtable = $('#teamtable').DataTable({
                 'scrollY': 450,
                 'scrollX': true,
                 'paging': false,
                 'searching': false,
                 'info': false,
                 'language': {'emptyTable': 'No players selected'},
-                'ajax': {
-                    'url': '/draft_data',
-                    'type': 'GET',
-                    'dataSrc': 'teamdata'
-                },
+                'data': teamdata,
                 'columns': [
                     {data: 'position'},
                     {data: 'player'}
@@ -198,9 +202,9 @@
                 'columnDefs': [
                     {'width':'30%', targets: 0}
                 ]
-            });
-            
-            $('#drafttable tbody').on('click', '.btn-pick', function() {
+                });
+
+                            $('#drafttable tbody').on('click', '.btn-pick', function() {
                 var data = drafttable.row($(this).parents('tr')).data();
                 var player = data.player;
                 var position = data.position;
@@ -279,6 +283,8 @@
                     $('#prevplayerlabel').text(data.prev_player_label);
                     $('#prevposlabel').text(data.prev_pos_label);
                 });
+            });
+
             });
         });
     </script>
