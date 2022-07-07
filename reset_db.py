@@ -5,11 +5,14 @@ Created on Fri Jul  1 17:35:39 2022
 @author: Ernesto Cortés
 """
 
-from flaskfantasy import db
+import sys
+from flaskfantasy.models import Adp, Projections
 from scrapers import *
 
-db.drop_all()
-db.create_all()
-fantasypros_adp(2022)
-fantasypros_projections(2022)
-fantasyfootballcalc_adp(2022)
+
+season = int(sys.argv[1])
+Apd.query.delete()
+Projections.query.delete()
+fantasypros_adp(season)
+fantasypros_projections(season)
+fantasyfootballcalc_adp(season)

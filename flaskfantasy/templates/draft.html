@@ -3,7 +3,7 @@
 {% block content %}
     <div class="container px-5 py-5">
         <div class="row">
-            <div class="col-md-12 mb-4">
+            <div class="col-lg-12 mb-4">
                 <div class="content-section h-100">
                     <h4><strong>Draft</strong></h4>
                     <div class="card">
@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-9 mb-4">
+            <div class="col-lg-9 mb-4">
                 <div class="content-section h-100">
                     <h5 id="picklabel" class="border-bottom fw-bold p-2">{{ pick_label }}</h5>
                     <div class="form-check form-check-inline">
@@ -63,7 +63,7 @@
                     </table>
                 </div>
             </div>
-            <div class="col-md-3 mb-4">
+            <div class="col-lg-3 mb-4">
                 <div class="content-section h-100">
                     <h5 id="teamlabel" class="border-bottom fw-bold p-2">{{ team_label }}</h5>
                     <table id="teamtable" class="table table-hover table-sm nowrap" style="width:100%">
@@ -79,7 +79,7 @@
             </div>      
         </div>
         <div class="row"> 
-            <div class="col-md-9 mb-4">
+            <div class="col-lg-9 mb-4">
                <div class="content-section h-100">
                    <h5 id="nextpicklabel" class="fw-bold">{{ next_pick_label }}</h5>
                    <h6 class="border-bottom  pb-2">Projected Replacements</h6>
@@ -94,7 +94,7 @@
                    </table>
                </div> 
             </div> 
-            <div class="col-md-3 mb-4">
+            <div class="col-lg-3 mb-4">
                 <div class="content-section h-100">
                     <h5 id="prevpicklabel" class="fw-bold">{{ prev_pick_label }}</h5>
                     <h6 id="prevteamlabel" class="border-bottom pb-2">{{ prev_team_label }}</h6>
@@ -137,14 +137,15 @@
                 'paging': false,
                 'info': false,
                 'data': draftdata,
-                'rowCallback': function ( row, data, index ) {
+                'rowCallback': function ( row, data ) {
                     if ( data.gap_pct > 0 ) {
-                        $('td:eq(5)', row).css('color', '#00C248');} //38E277
+                        $('td:eq(6)', row).css('color', '#00C248');}
                     else if ( data.gap_pct < 0 ) {
-                        $('td:eq(5)', row).css('color', '#FF2C00');} //FF603F
+                        $('td:eq(6)', row).css('color', '#FF2C00');}
                 },
                 'columns': [
                     {defaultContent: '<button class="btn btn-pick"><i class="bi bi-plus-circle-fill"></i></button>'},
+                    {data: 'rank'},
                     {data: 'player'},
                     {data: 'position'},
                     {data: 'fantasy_points'},
@@ -159,14 +160,14 @@
                 ],
                 'columnDefs': [
                     { orderable: false, targets: 0 },
-                    { className: 'fw-bold', targets: 5 },
-                    { render: DataTable.render.number(',', '.', '1'), targets: [3, 4, 5, 6]}
+                    { className: 'fw-bold', targets: [6] },
+                    { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6, 7]}
                 ],
-                'order': [[ 7, 'asc' ], [ 5, 'desc' ], [ 6, 'asc' ]]
+                'order': [[ 1, 'asc' ]]
                 });
 
                 $('.search').click(function() {
-                drafttable.column(2).search($(this).data('val'), true, false).draw();
+                drafttable.column(3).search($(this).data('val'), true, false).draw();
                 });
 
                 var repltable = $('#repltable').DataTable({
@@ -204,7 +205,7 @@
                 ]
                 });
 
-                            $('#drafttable tbody').on('click', '.btn-pick', function() {
+                $('#drafttable tbody').on('click', '.btn-pick', function() {
                 var data = drafttable.row($(this).parents('tr')).data();
                 var player = data.player;
                 var position = data.position;

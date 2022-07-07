@@ -111,7 +111,7 @@ class DraftState:
 
 
 class NflPlayer:
-    def __init__(self, player, position, adp, fantasy_points, gap_pts=None, gap_pct=None, urgency=None, pick=None, team=None):
+    def __init__(self, player, position, adp, fantasy_points, gap_pts=None, gap_pct=None, urgency=None, pick=None, team=None, rank=None):
         self.player = player
         self.position = position
         self.adp = adp
@@ -119,6 +119,7 @@ class NflPlayer:
         self.gap_pts = gap_pts
         self.gap_pct = gap_pct
         self.urgency = urgency
+        self.rank = rank
         
     def __repr__(self):
         return "|".join([self.player, self.position])
@@ -160,6 +161,10 @@ class NflPlayer:
         replacement = next(r for r in replacements if r.position == self.position)
         self.gap_pts = self.fantasy_points - replacement.fantasy_points
         self.gap_pct = (self.fantasy_points - replacement.fantasy_points) / replacement.fantasy_points * 100 if replacement.fantasy_points > 0 else 9999.9
+        return self
+
+    def calc_rank(self, free_agents):
+        self.rank = free_agents.index(self) + 1
         return self
 
 
@@ -305,7 +310,7 @@ def draft():
         draft_data['adp'] =  draft_data['adp'].astype(float).round(1).fillna(999.9)
         draft_data.fillna(0, inplace=True)
         draft_data.sort_values(by=['adp', 'fantasy_points'], ascending=[True, False], inplace=True)
-        draft_head = ['', 'Player', 'Pos', 'FPts', 'Gap', 'Gap %', 'ADP', 'Urgency']
+        draft_head = ['', 'Rk', 'Player', 'Pos', 'FPts', 'Gap', 'Gap %', 'ADP', 'Urgency']
         repl_head = ['Player', 'Pos', 'FPts', 'ADP']
         team_head = ['Pos', 'Player']
         total_picks = (roster_size - 2) * num_teams
@@ -346,13 +351,16 @@ def draft_data():
     if session['state'].system in ['1-QB', '2-QB']:
         state_copy = deepcopy(session['state'])
         replacements = state_copy.get_replacements()
-        free_agents = [p.calc_urgency(state_copy).calc_gap(replacements).__dict__ for p in free_agents]
+        free_agents = [p.calc_urgency(state_copy).calc_gap(replacements) for p in free_agents]
     else: 
         replacements = []
         for pos in ['QB', 'WR', 'RB', 'TE']:
             replacement = next((r for r in free_agents[picks_until_next[pick_num - 1]:] if r.position == pos), NflPlayer('N/A', pos, 999.9, 0))
             replacements.append(replacement) 
-        free_agents = [p.calc_urgency_adp(pick_num, picks_until_next, free_agents).calc_gap(replacements).__dict__ for p in free_agents]
+        free_agents = [p.calc_urgency_adp(pick_num, picks_until_next, free_agents).calc_gap(replacements) for p in free_agents]
+   
+    free_agents.sort(key=lambda x: (x.urgency['urgency'], -x.gap_pct, x.adp))
+    free_agents = [p.calc_rank(free_agents).__dict__ for p in free_agents]
 
     replacements = [r.__dict__ for r in replacements]
     roster = [p.__dict__ for p in session['state'].rosters[session['state'].team_pick - 1]]
