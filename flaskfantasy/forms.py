@@ -24,7 +24,7 @@ class SettingsForm(FlaskForm):
     
     num_teams = SelectField('Number of teams',
                             validators=[InputRequired()],
-                            choices=[8, 10, 12, 14, 16],
+                            choices=[8, 10, 12, 14, 16, 18, 20],
                             default=12)
     
     roster_size = SelectField('Roster size',
