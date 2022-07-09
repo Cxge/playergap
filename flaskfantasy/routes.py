@@ -130,15 +130,6 @@ class NflPlayer:
             and self.gap_pts == other.gap_pts and self.gap_pct == other.gap_pct and self.urgency == other.urgency
         return False
 
-#    def calc_urgency_adp(self, pick_num, picks_until_next):
-#        if self.adp <= pick_num + picks_until_next[pick_num - 1]:
-#            self.urgency = {'urgency': 1, 'display': 'High'}
-#        elif self.adp >= pick_num + picks_until_next[pick_num - 1] + picks_until_next[pick_num + picks_until_next[pick_num - 1] - 1]:
-#            self.urgency = {'urgency': 3, 'display': 'Low'}
-#        else:
-#            self.urgency = {'urgency': 2, 'display': 'Medium'}
-#        return self
-
     def calc_urgency_adp(self, pick_num, picks_until_next, free_agents):
         if self in free_agents[:picks_until_next[pick_num - 1]]:
             self.urgency = {'urgency': 1, 'display': 'High'}
