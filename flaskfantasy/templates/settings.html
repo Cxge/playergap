@@ -39,6 +39,15 @@
                                         {{ form.roster_size.label(class="col-sm-5 col-form-label") }}
                                         <div class="col-sm-7">
                                             {{ form.roster_size(class="form-select") }}
+                                            <div class="form-text">Excluding K and DST</div>
+                                        </div>   
+                                    </div>
+                                    <div class="row mb-3">
+                                        {{ form.keepers_flag.label(class="col-sm-5 col-form-label") }}
+                                        <div class="col-sm-7 d-flex align-items-center">
+                                            <div class="form-check form-switch form-switch-sm">
+                                                {{ form.keepers_flag(class="form-check-input switch-custom") }}
+                                            </div>
                                         </div>    
                                     </div>
                                 </div>
@@ -125,61 +134,6 @@
                             {{ form.save_settings(class="btn btn-custom") }}
                         </div>
                     </form>
-                    <script>
-                        let system_select = document.getElementById('system');
-                        let num_teams_select = document.getElementById('num_teams');
-                        let roster_size_select = document.getElementById('roster_size');
-                        let scoring_format_select = document.getElementById('scoring_format');
-                        let adp_source_select = document.getElementById('adp_source');
-                        
-                        system_select.onchange = function() {
-                            system = system_select.value;
-                            scoring_format = scoring_format_select.value;
-                            num_teams = num_teams_select.value;  
-                            adp_source = adp_source_select.value; 
-                            
-                            fetch('/settings/adp_sources/' + system + '/' + scoring_format).then(function(response) {
-                                response.json().then(function(data) {
-                                    let optionHTML = '';
-                                    for (let src of data.adp_sources) {
-                                        optionHTML += '<option value="' + src + '">' + src + '</option>';
-                                    }
-                                    
-                                    adp_source_select.innerHTML = optionHTML;
-                                    
-                                });
-                            });
-
-                            fetch('/settings/num_rounds/' + system).then(function(response) {
-                                response.json().then(function(data) {
-                                    let optionHTML = '';
-                                    for (let rd of data.num_rounds) {
-                                        optionHTML += '<option value="' + rd + '">' + rd + '</option>';
-                                    }
-                                    
-                                    roster_size_select.innerHTML = optionHTML;
-                                    
-                                });
-                            });                            
-                        }
-                        
-                        scoring_format_select.onchange = function() {
-                            system = system_select.value;
-                            scoring_format = scoring_format_select.value;  
-                            
-                            fetch('/settings/adp_sources/' + system + '/' + scoring_format).then(function(response) {
-                                response.json().then(function(data) {
-                                    let optionHTML = '';
-                                    for (let src of data.adp_sources) {
-                                        optionHTML += '<option value="' + src + '">' + src + '</option>';
-                                    }
-                                    
-                                    adp_source_select.innerHTML = optionHTML;
-                                    
-                                });
-                            });
-                        }
-                    </script>
                 </div> 
                 <p>
                     <strong>ADP sources:</strong>
@@ -196,3 +150,70 @@
         </div>
     </div>
 {% endblock content %}
+
+{% block script %}
+    <script>
+        let system_select = document.getElementById('system');
+        let num_teams_select = document.getElementById('num_teams');
+        let roster_size_select = document.getElementById('roster_size');
+        let scoring_format_select = document.getElementById('scoring_format');
+        let adp_source_select = document.getElementById('adp_source');
+        
+        system_select.onchange = function() {
+            system = system_select.value;
+            scoring_format = scoring_format_select.value;
+            num_teams = num_teams_select.value;  
+            adp_source = adp_source_select.value; 
+            
+            fetch('/settings/adp_sources/' + system + '/' + scoring_format).then(function(response) {
+                response.json().then(function(data) {
+                    let optionHTML = '';
+                    for (let src of data.adp_sources) {
+                        optionHTML += '<option value="' + src + '">' + src + '</option>';
+                    }
+                    
+                    adp_source_select.innerHTML = optionHTML;
+                    
+                });
+            });
+
+            fetch('/settings/num_rounds/' + system).then(function(response) {
+                response.json().then(function(data) {
+                    let optionHTML = '';
+                    for (let rd of data.num_rounds) {
+                        optionHTML += '<option value="' + rd + '">' + rd + '</option>';
+                    }
+                    
+                    roster_size_select.innerHTML = optionHTML;
+                    
+                });
+            });                            
+        }
+        
+        scoring_format_select.onchange = function() {
+            system = system_select.value;
+            scoring_format = scoring_format_select.value;  
+            
+            fetch('/settings/adp_sources/' + system + '/' + scoring_format).then(function(response) {
+                response.json().then(function(data) {
+                    let optionHTML = '';
+                    for (let src of data.adp_sources) {
+                        optionHTML += '<option value="' + src + '">' + src + '</option>';
+                    }
+                    
+                    adp_source_select.innerHTML = optionHTML;
+                    
+                });
+            });
+        }
+
+        $('#system').on('change', function() {
+            const array = ['1-QB', '2-QB'];
+            if (array.includes($(this).val())) {
+                $('#keepers_flag').prop("disabled", false);
+            } else {
+                $('#keepers_flag').prop("disabled", true);
+            }
+        });
+    </script>
+{% endblock script %}

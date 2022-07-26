@@ -20,7 +20,7 @@
                                 {% for row in result_head[:-2] %}
                                 <th></th>
                                 {% endfor %}
-                                <th class="text-center">Total: </th>
+                                <th class="">Total: </th>
                                 <th id="total"></th>
                             </tr>
                         </tfoot>
@@ -34,7 +34,6 @@
 {% block script %}
     <script>
         $(document).ready(function(){     
-                       
              var resultstable = $('#resultstable').DataTable({
                   'responsive': true,
                   'paging': false,
@@ -87,7 +86,6 @@
                         }, 0 );
                       $('#total').html(sum);
                     }	
-            
             });   
         });
     </script>
