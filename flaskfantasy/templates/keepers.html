@@ -3,13 +3,13 @@
 {% block content %}
     <div class="container px-5 py-5">
         <div class="row justify-content-center">
-            <div class="col-md-7">
+            <div class="col-md-5">
                 <div class="content-section">
                     <h4 class="border-bottom fw-bold p-2">Keepers</h4>
                     <div class="d-flex flex-row-reverse">
                         <button class="btn btn-add" id="add_row" name="add_row" type="submit" value="Add row">Add</button>
                     </div>
-                    <table id="keeperstable" class="table table-sm nowrap" style="width:100%">
+                    <table id="keeperstable" class="table table-sm nowrap w-100">
                         <thead class="thead-custom">
                             <tr>
                                 {% for row in keepers_head %}
@@ -20,25 +20,31 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <select class="player form-select form-select-sm">
-                                        {% for row in players %}
-                                        <option value="{{ row }}">{{ row }}</option>
-                                        {% endfor %}
-                                    </select>
+                                    <div class="d-flex justify-content-center">
+                                        <select class="player form-select form-select-sm w-auto">
+                                            {% for row in players %}
+                                            <option value="{{ row }}">{{ row }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 </td>
                                 <td>
-                                    <select class="team form-select form-select-sm">
-                                        {% for row in teams %}
-                                        <option value="{{ row }}">{{ row }}</option>
-                                        {% endfor %}
-                                    </select>
+                                    <div class="d-flex justify-content-center">
+                                        <select class="team form-select form-select-sm w-auto">
+                                            {% for row in teams %}
+                                            <option value="{{ row }}">{{ row }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 </td>
                                 <td>
-                                    <select class="round form-select form-select-sm">
-                                        {% for row in rounds %}
-                                        <option value="{{ row }}">{{ row }}</option>
-                                        {% endfor %}
-                                    </select>
+                                    <div class="d-flex justify-content-center">
+                                        <select class="round form-select form-select-sm w-auto">
+                                            {% for row in rounds %}
+                                            <option value="{{ row }}">{{ row }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center">
@@ -48,7 +54,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <button class="btn btn-custom" id="save_keepers" name="save_keepers" type="submit" value="Next">Next</button>
+                    <button class="btn btn-custom mt-2" id="save_keepers" name="save_keepers" type="submit" value="Next">Next</button>
                 </div>
             </div>
         </div>
@@ -64,7 +70,9 @@
                 'searching': false,
                 'ordering': false,
                 'language': {'emptyTable': 'No keepers defined'},
+                'scrollX': true
             });
+
             const r = t.row().data();
             var num_rows = t.rows().count();
             const max_rows = 20 * 4;
