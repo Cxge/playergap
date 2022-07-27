@@ -26,7 +26,7 @@
         <div class="row">
             <div class="col-lg-9 mb-4">
                 <div class="content-section h-100">
-                    <h5 id="picklabel" class="border-bottom fw-bold p-2">{{ pick_label }}</h5>
+                    <h5 id="picklabel" class="border-bottom fw-bold p-2"></h5>
                     <div class="form-check form-check-inline">
                       <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" data-val="" checked>
                       <label class="form-check-label" for="inlineRadio1">All</label>
@@ -65,7 +65,7 @@
             </div>
             <div class="col-lg-3 mb-4">
                 <div class="content-section h-100">
-                    <h5 id="teamlabel" class="border-bottom fw-bold p-2">{{ team_label }}</h5>
+                    <h5 id="teamlabel" class="border-bottom fw-bold p-2"></h5>
                     <table id="teamtable" class="table table-hover table-sm nowrap" style="width:100%">
                         <thead class="thead-custom">
                             <tr>
@@ -81,7 +81,7 @@
         <div class="row"> 
             <div class="col-lg-9 mb-4">
                <div class="content-section h-100">
-                   <h5 id="nextpicklabel" class="fw-bold">{{ next_pick_label }}</h5>
+                   <h5 id="nextpicklabel" class="fw-bold"></h5>
                    <h6 class="border-bottom  pb-2">Projected Replacements</h6>
                    <table id="repltable" class="table table-hover table-sm nowrap" style="width:100%">
                        <thead class="thead-custom">
@@ -96,11 +96,11 @@
             </div> 
             <div class="col-lg-3 mb-4">
                 <div class="content-section h-100">
-                    <h5 id="prevpicklabel" class="fw-bold">{{ prev_pick_label }}</h5>
-                    <h6 id="prevteamlabel" class="border-bottom pb-2">{{ prev_team_label }}</h6>
+                    <h5 id="prevpicklabel" class="fw-bold"></h5>
+                    <h6 id="prevteamlabel" class="border-bottom pb-2"></h6>
                     <div class="d-flex align-items-center flex-column justify-content-center m-auto">
-                        <br><p id="prevplayerlabel">{{ prev_player_label }}</p>
-                        <p id="prevposlabel">{{ prev_pos_label }}</p>
+                        <br><p id="prevplayerlabel"></p>
+                        <p id="prevposlabel"></p>
                         <div>
                             <button id="undo-btn" class="btn btn-custom" disabled>Undo</button>
                         </div>
@@ -113,9 +113,17 @@
 
 {% block script %}
     <script>
-        var draftdata = [];
-        var repldata = [];
-        var teamdata = [];
+        var draftdata;
+        var repldata;
+        var teamdata;
+        var picklabel;
+        var nextpicklabel;
+        var teamlabel;
+        var prevpicklabel;
+        var prevteamlabel;
+        var prevplayerlabel;
+        var prevposlabel;
+
         function ajax() {
             return $.ajax({
                 url: "/draft_data",
@@ -123,6 +131,13 @@
                     draftdata = data.draftdata;
                     repldata = data.repldata;
                     teamdata = data.teamdata;
+                    picklabel = data.pick_label;
+                    nextpicklabel = data.next_pick_label;
+                    teamlabel = data.team_label;
+                    prevpicklabel = data.prev_pick_label;
+                    prevteamlabel = data.prev_team_label;
+                    prevplayerlabel = data.prev_player_label;
+                    prevposlabel = data.prev_pos_label;
                 },
                 type: "GET"
             });
@@ -131,8 +146,16 @@
         $(document).ready(function(){
 
             $.when(ajax()).done(function() {
+                $('#picklabel').text(picklabel);
+                $('#nextpicklabel').text(nextpicklabel);
+                $('#teamlabel').text(teamlabel);
+                $('#prevpicklabel').text(prevpicklabel);
+                $('#prevteamlabel').text(prevteamlabel);
+                $('#prevplayerlabel').text(prevplayerlabel);
+                $('#prevposlabel').text(prevposlabel);
+
                 var drafttable = $('#drafttable').DataTable({
-                'scrollY': 360,
+                'scrollY': 355,
                 'scrollX': true,
                 'paging': false,
                 'info': false,
@@ -144,7 +167,7 @@
                         $('td:eq(6)', row).css('color', '#FF2C00');}
                 },
                 'columns': [
-                    {defaultContent: '<button class="btn btn-pick"><i class="bi bi-plus-circle-fill"></i></button>'},
+                    {defaultContent: '<div class="d-flex justify-content-center"><button class="btn btn-pick"><i class="bi bi-plus-circle-fill"></i></button></div>'},
                     {data: 'rank'},
                     {data: 'player'},
                     {data: 'position'},
@@ -221,12 +244,12 @@
                 $('#undo-btn').attr("disabled", true);
                 
                 req.done(function(data) {
-                    if (data.pick_num > 1) {
+                    if (data.counter > 0) {
                         $('#undo-btn').attr("disabled", false);                   
                     } else {
                         $('#undo-btn').attr("disabled", true);
                     };
-                    if (data.pick_num > Math.min(data.total_players, data.total_picks)) {
+                    if (data.counter+1 > Math.min(data.total_players, data.total_picks)) {
                         alert('That was the last pick of the draft. Good luck!');
                         var $form=$(document.createElement('form')).css({display:'none'}).attr("method","POST").attr("action","/results");
                         $("body").append($form);
@@ -262,7 +285,7 @@
                 $('#undo-btn').attr("disabled", true);
                 
                 req.done(function(data) {
-                    if (data.pick_num > 1) {
+                    if (data.counter > 0) {
                         $('#undo-btn').attr("disabled", false);                   
                     } else {
                         $('#undo-btn').attr("disabled", true);

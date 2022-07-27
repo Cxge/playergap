@@ -78,6 +78,36 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 0rem 0rem;
 }
 
+.btn-add {
+  color: #FFFFFF;
+  background-color: #3CACD7;
+  border-color: #3CACD7;
+}
+
+.btn-add:hover {
+  color: #FFFFFF;
+  background-color: #1A99CA;
+  border-color: #1A99CA;
+}
+
+.btn-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.65rem;
+  width: 1.65rem;
+  font-size: 1.65rem;
+  color: #FF603F;
+  padding: 0;
+  border: 0;
+  line-height: 0;
+}
+
+.btn-remove:hover {
+  color: #F3340C;
+  background-size: 0rem 0rem;
+}
+
 .form-check-input:checked {
     background-color: #485162;
     border-color: #485162;
@@ -116,4 +146,9 @@ h1, h2, h3, h4, h5, h6 {
 .alert {
   margin-bottom: 0;
 }
+
+.form-switch.form-switch-sm .form-check-input {
+  height: 1.5rem;
+  width: calc(2rem + 0.75rem);
+  border-radius: 3rem;}
 

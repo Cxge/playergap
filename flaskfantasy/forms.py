@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm, RecaptchaField
-from wtforms import SelectField, SubmitField, StringField, TextAreaField, DecimalField
+from wtforms import SelectField, SubmitField, StringField, TextAreaField, DecimalField, BooleanField
 from wtforms.validators import InputRequired
 
 
@@ -31,6 +31,8 @@ class SettingsForm(FlaskForm):
                               validators=[InputRequired()],
                               choices=[i for i in range(10, 17)],
                               default=13)
+
+    keepers_flag = BooleanField('Keepers')
 
     pass_yd = DecimalField('Passing yards',
                             validators=[InputRequired()],
