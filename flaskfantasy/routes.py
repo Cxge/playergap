@@ -41,10 +41,10 @@ class DraftState:
         self.next_pick =  self.next_picks[self.counter]
         self.team_pick = self.team_picks[self.counter]
         self.system = system
-        self.teams = [*range(1,num_teams+1)]
-        self.rounds = [*range(1,roster_size+1)]
+        self.teams = [*range(1,num_teams + 1)]
+        self.rounds = [*range(1,roster_size + 1)]
         self.picks_per_team = {}
-        for j in range(1, num_teams+1):
+        for j in range(1, num_teams + 1):
             self.picks_per_team[j] = [i for i, x in enumerate(self.team_picks) if x == j]
         
     def make_selection(self, player_name):
