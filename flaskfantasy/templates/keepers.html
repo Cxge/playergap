@@ -65,14 +65,28 @@
                 'ordering': false,
                 'language': {'emptyTable': 'No keepers defined'},
             });
-            var r = t.row().data();
+            const r = t.row().data();
+            var num_rows = t.rows().count();
+            const max_rows = 20 * 4;
  
             $('#add_row').on('click', function () {
                 t.row.add(r).draw(false);
+                num_rows += 1;
+                if (num_rows <= max_rows) {
+                    $('#add_row').prop("disabled", false);
+                } else {
+                    $('#add_row').prop("disabled", true);
+                }   
             });
 
             $('#keeperstable tbody').on('click', '.btn-remove', function () {
                 t.row( $(this).parents('tr') ).remove().draw();
+                num_rows -= 1;
+                if (num_rows <= max_rows) {
+                    $('#add_row').prop("disabled", false);
+                } else {
+                    $('#add_row').prop("disabled", true);
+                }
             });
 
             $('#save_keepers').click(function () {

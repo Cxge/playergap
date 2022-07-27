@@ -324,7 +324,7 @@ def draft():
         session['state'] = DraftState(free_agents, system, num_teams, roster_size)
         
         if 'keepers_flag' in request.form:
-            return redirect(url_for('keepers'))
+            return redirect(url_for('keepers'), code=307)
     else:
         keepers = loads(request.form['keepers'])['data']
         df_keepers = pd.DataFrame(keepers)
@@ -426,7 +426,7 @@ def adp_sources(system, scoring):
     return jsonify({'adp_sources': choices})
 
 
-@app.route("/settings/keepers")
+@app.route("/settings/keepers", methods=['POST'])
 def keepers():
     keepers_head = ['Player', 'Team', 'Round Cost', '']
     players = sorted([p.player for p in session['state'].free_agents], key=str.lower)
