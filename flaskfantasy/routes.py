@@ -428,6 +428,7 @@ def adp_sources(system, scoring):
 
 @app.route("/settings/keepers", methods=['POST'])
 def keepers():
+    hack = request.data
     keepers_head = ['Player', 'Team', 'Round Cost', '']
     players = sorted([p.player for p in session['state'].free_agents], key=str.lower)
     teams = session['state'].teams
