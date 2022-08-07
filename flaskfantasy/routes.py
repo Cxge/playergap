@@ -393,7 +393,7 @@ def draft_data():
 
 @app.route("/results", methods=['POST'])
 def results():
-    return render_template('results.html', title='Draft', result_head=['Team', 'Pick', 'Player', 'Pos', 'FPts'])
+    return render_template('results.html', title='Results', result_head=['Team', 'Pick', 'Player', 'Pos', 'FPts'])
 
 
 @app.route("/results_data", methods=['GET'])
