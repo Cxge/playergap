@@ -145,13 +145,12 @@ class DraftState:
 
 
 class NflPlayer:
-    def __init__(self, player, position, adp, fantasy_points, gap_pts=None, gap_pct=None, urgency=None, pick=None, team=None, rank=None):
+    def __init__(self, player, position, adp, fantasy_points, gap_pts=None, urgency=None, pick=None, team=None, rank=None):
         self.player = player
         self.position = position
         self.adp = adp
         self.fantasy_points = fantasy_points
         self.gap_pts = gap_pts
-        self.gap_pct = gap_pct
         self.urgency = urgency
         self.rank = rank
         
@@ -161,7 +160,7 @@ class NflPlayer:
     def __eq__(self, other):
         if (isinstance(other, NflPlayer)):
             return self.player == other.player and self.position == other.position and self.adp == other.adp and self.fantasy_points == other.fantasy_points \
-            and self.gap_pts == other.gap_pts and self.gap_pct == other.gap_pct and self.urgency == other.urgency
+            and self.gap_pts == other.gap_pts and self.urgency == other.urgency
         return False
 
     def calc_urgency_adp(self, counter, picks_until_next, free_agents):
@@ -184,8 +183,7 @@ class NflPlayer:
 
     def calc_gap(self, replacements):
         replacement = next(r for r in replacements if r.position == self.position)
-        self.gap_pts = self.fantasy_points - replacement.fantasy_points
-        self.gap_pct = (self.fantasy_points - replacement.fantasy_points) / replacement.fantasy_points * 100 if replacement.fantasy_points > 0 else 9999.9
+        self.gap_pts = round(self.fantasy_points - replacement.fantasy_points, 1)
         return self
 
     def calc_rank(self, free_agents):
@@ -333,7 +331,7 @@ def draft():
         keepers = df_keepers.to_dict('records')
         session['state'].assign_keepers(keepers)
 
-    draft_head = ['', 'Rk', 'Player', 'Pos', 'FPts', 'Gap', 'Gap %', 'ADP', 'Urgency']
+    draft_head = ['', 'Rk', 'Player', 'Pos', 'FPts', 'Gap', 'ADP', 'Urgency']
     repl_head = ['Player', 'Pos', 'FPts', 'ADP']
     team_head = ['Pos', 'Player']
 
@@ -367,7 +365,7 @@ def draft_data():
             replacements.append(replacement) 
         free_agents = [p.calc_urgency_adp(counter, picks_until_next, free_agents).calc_gap(replacements) for p in free_agents]
    
-    free_agents.sort(key=lambda x: (x.urgency['urgency'], -x.gap_pct, x.adp))
+    free_agents.sort(key=lambda x: (x.urgency['urgency'], -x.gap_pts, x.adp))
     free_agents = [p.calc_rank(free_agents).__dict__ for p in free_agents]
 
     replacements = [r.__dict__ for r in replacements]

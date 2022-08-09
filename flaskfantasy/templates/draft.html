@@ -10,7 +10,7 @@
                         <div class="card-body bg-light pb-2">
                             <div class="card-text">
                                 <p>
-                                    <strong>Rankings</strong> are based on the <strong>Fantasy Points Gap %</strong> between a player and their projected positional replacement of the following round, and their level of <strong>Urgency</strong>, which represents the likelihood a player will be selected before your next pick. Urgency is determined by the following rules:
+                                    <strong>Rankings</strong> are based on the <strong>Fantasy Points Gap</strong> between a player and their projected positional replacement of the following round, and their level of <strong>Urgency</strong>, which represents the likelihood a player will be selected before your next pick. Urgency is determined by the following rules:
                                 </p>
                                 <ul>
                                     <li><strong>High</strong> if the player is projected to be selected before your next pick</li>
@@ -161,10 +161,10 @@
                 'info': false,
                 'data': draftdata,
                 'rowCallback': function ( row, data ) {
-                    if ( data.gap_pct > 0 ) {
-                        $('td:eq(6)', row).css('color', '#00C248');}
-                    else if ( data.gap_pct < 0 ) {
-                        $('td:eq(6)', row).css('color', '#FF2C00');}
+                    if ( data.gap_pts > 0 ) {
+                        $('td:eq(5)', row).css('color', '#00C248');}
+                    else if ( data.gap_pts < 0 ) {
+                        $('td:eq(5)', row).css('color', '#FF2C00');}
                 },
                 'columns': [
                     {defaultContent: '<div class="d-flex justify-content-center"><button class="btn btn-pick"><i class="bi bi-plus-circle-fill"></i></button></div>'},
@@ -173,7 +173,6 @@
                     {data: 'position'},
                     {data: 'fantasy_points'},
                     {data: 'gap_pts'},
-                    {data: 'gap_pct'},
                     {data: 'adp'},
                     {data: 
                         {_: 'urgency.display',
@@ -183,8 +182,8 @@
                 ],
                 'columnDefs': [
                     { orderable: false, targets: 0 },
-                    { className: 'fw-bold', targets: [6] },
-                    { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6, 7]}
+                    { className: 'fw-bold', targets: [5] },
+                    { render: DataTable.render.number(',', '.', '1'), targets: [4, 5, 6]}
                 ],
                 'order': [[ 1, 'asc' ]]
                 });
