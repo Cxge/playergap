@@ -111,7 +111,6 @@
                     dataArr.push(tempObj);
                 }
                 dataStr = '{"data":' + JSON.stringify(dataArr).replace(/'/g, "&#39;") + '}' 
-                alert(dataStr)
                 url = '/draft'
                 var form = $('<form action="' + url + '" method="post">' +
                   '<input type="hidden" name="keepers" value=' + "'" + dataStr + "'" + '" />' +
