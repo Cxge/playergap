@@ -118,9 +118,10 @@ class DraftState:
         remove_indices = []
         for k in keepers:
             player_name = k['player']
+            position = k['position']
             tm = int(k['team'])
             rd = int(k['round'])
-            player = next(p for p in self.free_agents if p.player == player_name)
+            player = next(p for p in self.free_agents if p.player == player_name and p.position == position)
             pick_index = self.picks_per_team[tm][rd-1]
             player.pick = self.picks[pick_index]
             player.team = tm
@@ -326,7 +327,7 @@ def draft():
     else:
         keepers = loads(request.form['keepers'])['data']
         df_keepers = pd.DataFrame(keepers)
-        df_keepers.drop_duplicates(subset='player', keep='first', inplace=True)
+        df_keepers.drop_duplicates(subset=['player', 'position'], keep='first', inplace=True)
         df_keepers.drop_duplicates(subset=['team', 'round'], keep='first', inplace=True)
         keepers = df_keepers.to_dict('records')
         session['state'].assign_keepers(keepers)
@@ -428,7 +429,7 @@ def adp_sources(system, scoring):
 def keepers():
     hack = request.data
     keepers_head = ['Player', 'Team', 'Round Cost', '']
-    players = sorted([p.player for p in session['state'].free_agents], key=str.lower)
+    players = sorted([p.player + ' (' + p.position + ')' for p in session['state'].free_agents], key=str.lower)
     teams = session['state'].teams
     rounds = session['state'].rounds
     return render_template('keepers.html', title='Keepers', keepers_head=keepers_head, teams=teams, rounds=rounds, players=players)

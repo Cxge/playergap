@@ -101,14 +101,17 @@
                 var rowNodes = t.rows().nodes().toArray(); 
                 var dataArr = [];  
                 for (i = 0; i < rowNodes.length; i++) {
+                    let player_position = $(rowNodes[i]).find("select.player option:selected").text().split(" (");
                     let tempObj = {
-                        player: $(rowNodes[i]).find("select.player option:selected").text(),
+                        player: player_position[0],
+                        position: player_position[1].slice(0, -1),
                         team: $(rowNodes[i]).find("select.team option:selected").text(),
                         round: $(rowNodes[i]).find("select.round option:selected").text()
                     }
                     dataArr.push(tempObj);
                 }
                 dataStr = '{"data":' + JSON.stringify(dataArr).replace(/'/g, "&#39;") + '}' 
+                alert(dataStr)
                 url = '/draft'
                 var form = $('<form action="' + url + '" method="post">' +
                   '<input type="hidden" name="keepers" value=' + "'" + dataStr + "'" + '" />' +
