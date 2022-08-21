@@ -231,7 +231,42 @@ def fantasyfootballcalc_adp(season):
     df_final['name'].replace(r'\s(?:I+|IV|V|VI|VI+|IX|X|Jr\.|Jr)$', '', regex=True, inplace=True)
     #df_final['name'] = np.where(df_final['name'].str.contains(r'^[A-Z]{2}\s'), df_final['name'].apply(lambda x: '.'.join(x.split(' ')[0]) + '. ' + ' '.join(x.split(' ')[1:])), df_final['name'])
     df_final['name'].replace('\.', '', regex=True, inplace=True)
-    df_final['name'].replace({'Pat Mahomes':'Patrick Mahomes', 'Kenneth Walker':'Ken Walker'}, inplace=True)
+    fantasypros_names = {'Arizona Defense':'Arizona Cardinals',
+                     'Atlanta Defense':'Atlanta Falcons',
+                     'Baltimore Defense':'Baltimore Ravens',
+                     'Buffalo Defense':'Buffalo Bills',
+                     'Carolina Defense':'Carolina Panthers',
+                     'Chicago Defense':'Chicago Bears',
+                     'Cincinnati Defense':'Cincinnati Bengals',
+                     'Cleveland Defense':'Cleveland Browns',
+                     'Dallas Defense':'Dallas Cowboys',
+                     'Denver Defense':'Denver Broncos',
+                     'Detroit Defense':'Detroit Lions',
+                     'Green Bay Defense':'Green Bay Packers',
+                     'Houston Defense':'Houston Texans',
+                     'Indianapolis Defense':'Indianapolis Colts',
+                     'Jacksonville Defense':'Jacksonville Jaguars',
+                     'Kansas City Defense':'Kansas City Chiefs',
+                     'Las Vegas Defense':'Las Vegas Raiders',
+                     'LA Chargers Defense':'Los Angeles Chargers',
+                     'LA Rams Defense':'Los Angeles Rams',
+                     'Miami Defense':'Miami Dolphins',
+                     'Minnesota Defense':'Minnesota Vikings',
+                     'New England Defense':'New England Patriots',
+                     'New Orleans Defense':'New Orleans Saints',
+                     'NY Giants Defense':'New York Giants',
+                     'NY Jets Defense':'New York Jets',
+                     'Philadelphia Defense':'Philadelphia Eagles',
+                     'Pittsburgh Defense':'Pittsburgh Steelers',
+                     'San Francisco Defense':'San Francisco 49ers',
+                     'Seattle Defense':'Seattle Seahawks',
+                     'Tampa Bay Defense':'Tampa Bay Bucaneers',
+                     'Tennessee Defense':'Tennessee Titans',
+                     'Washington Defense':'Washington Commanders',
+                     'Pat Mahomes':'Patrick Mahomes', 
+                     'Kenneth Walker':'Ken Walker'}
+    df_final['name'].replace(fantasypros_names, inplace=True)
+    df_final['position'].replace({'DEF':'DST', 'PK':'K'}, inplace=True)
     df_final['season'] = season
     df_final.rename(columns={'name': 'player'}, inplace=True)
     cols = ['player', 'position', 'team', 'adp', 'scoring', 'system', 'season', 'source_update']
@@ -248,4 +283,7 @@ def fantasyfootballcalc_adp(season):
         df_final.to_sql('adp', con=connection, index=False, if_exists='append')
 
     print('FantasyFootballCalculator_ADP: Season %s\n\n' % season, df_final.head())
+    
+if __name__ == "__main__":
+    fantasyfootballcalc_adp(2022)
 
