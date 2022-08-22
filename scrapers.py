@@ -6,6 +6,17 @@ from datetime import datetime
 import numpy as np
 import os
 
+
+def parse_defense(player):
+    if len(player.split(' ')) < 3:
+        dst = player[0:3].upper()
+    else:
+        dst = ''.join(w[0].upper() for w in player.split(' ')[:-1])
+    if dst in ['LA', 'NY']:
+        dst = str(dst) + player.split(' ')[-1][0]
+    return dst
+    
+
 def fftoday_projections(season):
     season = int(season)
     positions = {'QB': '10',
@@ -54,12 +65,7 @@ def fftoday_projections(season):
     df_final['source_update'] = update
     df_final['insert_timestamp'] = datetime.utcnow()
 
-    engine = create_engine('postgresql://{user}:{password}@{host}:{port}/{database}'
-                           .format(user='postgres',
-                                   password='aeae1994',
-                                   host='localhost',
-                                   port='5432',
-                                   database='fantasy_football'))
+    engine = create_engine(os.environ.get('DATABASE_URL'))
     with engine.begin() as connection:
         df_final.to_sql('projections', con=connection, index=False, if_exists='append')
 
@@ -68,7 +74,7 @@ def fftoday_projections(season):
 
 def fantasypros_projections(season):
     season = int(season)
-    positions = ['qb', 'rb', 'wr', 'te']
+    positions = ['qb', 'rb', 'wr', 'te', 'k', 'dst']
     df_final = pd.DataFrame()
     for position in positions:
         url = f'https://www.fantasypros.com/nfl/projections/{position}.php?week=draft'
@@ -77,9 +83,13 @@ def fantasypros_projections(season):
             soup = BeautifulSoup(response.text, 'html.parser')
             table = soup.find('table', {'id': 'data'})
             df = pd.read_html(str(table))[0]
-            df.columns = df.columns.map('_'.join)
-            df['player'] = df[df.columns[0]].apply(lambda x: ' '.join(x.split()[:-1]))
-            df['team'] = df[df.columns[0]].apply(lambda x: x.split()[-1])
+            df.columns = df.columns.map(''.join)
+            df.columns = df.columns.str.lower()
+            if position != 'dst':
+                df['team'] = df[df.columns[0]].apply(lambda x: x.split()[-1])
+                df['player'] = df[df.columns[0]].apply(lambda x: ' '.join(x.split()[:-1]))
+            else:
+                df['team'] = df.apply(lambda x: parse_defense(x['player']), axis=1)
             df['position'] = position.upper()
             df_final = pd.concat([df_final, df])
         else:
@@ -91,24 +101,36 @@ def fantasypros_projections(season):
     df_final['player'].replace('\.', '', regex=True, inplace=True)
     df_final = df_final.apply(pd.to_numeric, errors='ignore').reset_index(drop=True)
     df_final.fillna(0, inplace=True)
-    df_final = df_final.rename(columns={'PASSING_ATT': 'pass_att',
-                                        'PASSING_CMP': 'pass_cmp',
-                                        'PASSING_YDS': 'pass_yd',
-                                        'PASSING_TDS': 'pass_td',
-                                        'PASSING_INTS': 'pass_int',
-                                        'RUSHING_ATT': 'rush_att',
-                                        'RUSHING_YDS': 'rush_yd',
-                                        'RUSHING_TDS': 'rush_td',
-                                        'RECEIVING_REC': 'receiv_rec',
-                                        'RECEIVING_YDS': 'receiv_yd',
-                                        'RECEIVING_TDS': 'receiv_td',
-                                        'MISC_FL': 'fumble_lst'})
+    df_final = df_final.rename(columns={'passingatt': 'pass_att',
+                                        'passingcmp': 'pass_cmp',
+                                        'passingyds': 'pass_yd',
+                                        'passingtds': 'pass_td',
+                                        'passingints': 'pass_int',
+                                        'rushingatt': 'rush_att',
+                                        'rushingyds': 'rush_yd',
+                                        'rushingtds': 'rush_td',
+                                        'receivingrec': 'receiv_rec',
+                                        'receivingyds': 'receiv_yd',
+                                        'receivingtds': 'receiv_td',
+                                        'miscfl': 'fumble_lst',
+                                        'fg':'field_goal',
+                                        'fga':'field_goal_att',
+                                        'xpt':'extra_pt',
+                                        'int':'interception',
+                                        'fr':'fumble_recovered',
+                                        'ff':'forced_fumble',
+                                        'td':'def_td',
+                                        'pa':'pts_allowed',
+                                        'yds agn':'yd_against'
+                                        })
 
     cols = ['player', 'position', 'team',
             'pass_cmp', 'pass_att', 'pass_yd', 'pass_td', 'pass_int',
             'rush_att', 'rush_yd', 'rush_td',
             'receiv_rec', 'receiv_yd', 'receiv_td',
-            'fumble_lst']
+            'fumble_lst',
+            'field_goal', 'field_goal_att', 'extra_pt',
+            'sack', 'interception', 'fumble_recovered', 'forced_fumble', 'def_td', 'safety', 'pts_allowed', 'yd_against']
 
     df_final = df_final[cols]
     df_final['season'] = season
@@ -177,6 +199,7 @@ def fantasypros_adp(season):
     suffix = r'\s(?:I+|IV|V|VI|VI+|IX|X|Jr\.|Jr)$'
     df_final['player'].replace(suffix, '', regex=True, inplace=True)
     df_final['player'].replace('\.', '', regex=True, inplace=True)
+    df_final['team'] = np.where(df_final['position'] == 'DST', df_final.apply(lambda x: parse_defense(x['player']), axis=1), df_final['team'])
     df_final['season'] = season
     cols = ['player', 'position', 'team', 'adp', 'scoring', 'system', 'season', 'source_name']
     df_final = df_final[cols]
@@ -228,8 +251,8 @@ def fantasyfootballcalc_adp(season):
         else:
             print('Oops, something didn\'t work right', response.status_code)
             return    
-    df_final['name'].replace(r'\s(?:I+|IV|V|VI|VI+|IX|X|Jr\.|Jr)$', '', regex=True, inplace=True)
-    #df_final['name'] = np.where(df_final['name'].str.contains(r'^[A-Z]{2}\s'), df_final['name'].apply(lambda x: '.'.join(x.split(' ')[0]) + '. ' + ' '.join(x.split(' ')[1:])), df_final['name'])
+    df_final = df_final.loc[df_final['name'] != 'Deleted Deleted']
+    df_final['name'].replace(r'\s(?:I+|IV|V|VI|VI+|IX|X|Jr\.|Jr)$', '', regex=True, inplace=True)    
     df_final['name'].replace('\.', '', regex=True, inplace=True)
     fantasypros_names = {'Arizona Defense':'Arizona Cardinals',
                      'Atlanta Defense':'Atlanta Falcons',
@@ -260,30 +283,22 @@ def fantasyfootballcalc_adp(season):
                      'Pittsburgh Defense':'Pittsburgh Steelers',
                      'San Francisco Defense':'San Francisco 49ers',
                      'Seattle Defense':'Seattle Seahawks',
-                     'Tampa Bay Defense':'Tampa Bay Bucaneers',
+                     'Tampa Bay Defense':'Tampa Bay Buccaneers',
                      'Tennessee Defense':'Tennessee Titans',
                      'Washington Defense':'Washington Commanders',
                      'Pat Mahomes':'Patrick Mahomes', 
                      'Kenneth Walker':'Ken Walker'}
     df_final['name'].replace(fantasypros_names, inplace=True)
     df_final['position'].replace({'DEF':'DST', 'PK':'K'}, inplace=True)
+    df_final['team'].replace({'JAX':'JAC', 'FA':np.nan}, inplace=True)
     df_final['season'] = season
     df_final.rename(columns={'name': 'player'}, inplace=True)
     cols = ['player', 'position', 'team', 'adp', 'scoring', 'system', 'season', 'source_update']
     df_final = df_final[cols]
     df_final['source_name'] = 'FFC'
     df_final['insert_timestamp'] = datetime.utcnow()
-    engine = create_engine('postgresql://{user}:{password}@{host}:{port}/{database}'
-                           .format(user='postgres',
-                                   password='aeae1994',
-                                   host='localhost',
-                                   port='5432',
-                                   database='fantasy_football'))
+    engine = create_engine(os.environ.get('DATABASE_URL'))
     with engine.begin() as connection:
         df_final.to_sql('adp', con=connection, index=False, if_exists='append')
 
     print('FantasyFootballCalculator_ADP: Season %s\n\n' % season, df_final.head())
-    
-if __name__ == "__main__":
-    fantasyfootballcalc_adp(2022)
-

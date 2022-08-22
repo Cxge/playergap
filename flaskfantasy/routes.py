@@ -41,8 +41,8 @@ class DraftState:
         self.next_pick =  self.next_picks[self.counter]
         self.team_pick = self.team_picks[self.counter]
         self.system = system
-        self.teams = [*range(1,num_teams + 1)]
-        self.rounds = [*range(1,roster_size + 1)]
+        self.teams = [*range(1, num_teams + 1)]
+        self.rounds = [*range(1, roster_size + 1)]
         self.picks_per_team = {}
         for j in range(1, num_teams + 1):
             self.picks_per_team[j] = [i for i, x in enumerate(self.team_picks) if x == j]
@@ -167,7 +167,7 @@ class NflPlayer:
     def calc_urgency_adp(self, counter, picks_until_next, free_agents):
         if self in free_agents[:picks_until_next[counter]]:
             self.urgency = {'urgency': 1, 'display': 'High'}
-        elif self in free_agents[picks_until_next[counter] + 1:picks_until_next[counter] + picks_until_next[counter + picks_until_next[counter] - 1] + 1]:
+        elif self in free_agents[picks_until_next[counter]:picks_until_next[counter] + picks_until_next[counter + picks_until_next[counter]]]:
             self.urgency = {'urgency': 2, 'display': 'Medium'}
         else:
             self.urgency = {'urgency': 3, 'display': 'Low'}
@@ -420,7 +420,7 @@ def num_rounds(system):
 def adp_sources(system, scoring):
     choices = sorted([src.source_name for src in Adp.query.with_entities(Adp.source_name).filter(Adp.season==2022, Adp.system==system, 
         Adp.scoring==scoring).distinct()], key=str.casefold)
-    if system == '1-QB':
+    if len(choices) > 1:
         choices = ['All (Average)'] + choices
     return jsonify({'adp_sources': choices})
 
