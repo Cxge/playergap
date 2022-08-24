@@ -87,14 +87,18 @@ class DraftState:
                 'QB': [1, 0.6],
                 'WR': [1, 1, 0.8, 0.8, 0.6, 0.4],
                 'RB': [1, 1, 0.8, 0.8, 0.6, 0.4],
-                'TE': [1, 0.6]
+                'TE': [1, 0.6],
+                'K': [1],
+                'DST': [1]
             }
         else:
             pos_weights = {
                 'QB': [1, 1, 0.8, 0.4],
                 'WR': [1, 1, 0.8, 0.8, 0.6, 0.4],
                 'RB': [1, 1, 0.8, 0.8, 0.6, 0.4],
-                'TE': [1, 0.6]
+                'TE': [1, 0.6],
+                'K': [1],
+                'DST': [1]
             }
 
         for tm in self.team_picks[self.counter:next((i for i,n in enumerate(self.picks_ov) if n >= self.next_pick_ov))]:
@@ -249,6 +253,14 @@ def draft():
         receiv_yd = float(request.form['receiv_yd'])
         receiv_td = float(request.form['receiv_td'])
         fumble_lst = float(request.form['fumble_lst'])
+        field_goal = float(request.form['field_goal'])
+        extra_pt = float(request.form['extra_pt'])
+        sack = float(request.form['sack'])
+        interception = float(request.form['interception'])
+        fumble_recovered = float(request.form['fumble_recovered'])
+        def_td = float(request.form['def_td'])
+        safety = float(request.form['safety'])
+
 
         how_join = 'RIGHT' if system == 'Rookie' else 'LEFT'
         col_join = 'B.player, B.position, A.fantasy_points, B.adp' if system == 'Rookie' else 'A.player, A.position, A.fantasy_points, B.adp'
@@ -268,7 +280,6 @@ def draft():
                             WHERE season = {season} 
                             AND system = '{system}'
                             AND scoring = '{scoring_format}'
-                            AND position NOT IN ('K')
                             GROUP BY A.player, A.position
             """
 
@@ -278,7 +289,6 @@ def draft():
                              WHERE season = {season} 
                              AND system = '{system}'
                              AND scoring = '{scoring_format}'
-                             AND position NOT IN ('K')
                              AND source_name = '{adp_source}'
                              AND source_update = (SELECT MAX(source_update) 
                                                      FROM adp 
@@ -292,19 +302,26 @@ def draft():
         query = f"""
         SELECT {col_join}
         FROM        
-            (SELECT player, position, pass_yd    / {pass_yd}
-                                    + pass_td    * {pass_td}
-                                    + pass_int   * {pass_int}
-                                    + rush_yd    / {rush_yd}
-                                    + rush_td    * {rush_td}
+            (SELECT player, position, pass_yd / {pass_yd}
+                                    + pass_td * {pass_td}
+                                    + pass_int * {pass_int}
+                                    + rush_yd / {rush_yd}
+                                    + rush_td * {rush_td}
                                     + receiv_rec * {receiv_rec}
-                                    + receiv_yd  / {receiv_yd}
-                                    + receiv_td  * {receiv_td} 
-                                    + fumble_lst * {fumble_lst} AS fantasy_points
+                                    + receiv_yd / {receiv_yd}
+                                    + receiv_td * {receiv_td} 
+                                    + fumble_lst * {fumble_lst} 
+                                    + field_goal * {field_goal} 
+                                    + extra_pt * {extra_pt}
+                                    + sack * {sack}
+                                    + interception * {interception} 
+                                    + fumble_recovered * {fumble_recovered}  
+                                    + def_td * {def_td}
+                                    + safety * {safety}
+                                    AS fantasy_points
                         FROM projections
                         WHERE season = {season} 
                         AND source_name = 'FantasyPros'
-                        AND position NOT IN ('DST', 'K')
                         AND source_update = (SELECT MAX(source_update) FROM projections WHERE source_name = 'FantasyPros')
             ) A
             {how_join} JOIN
@@ -314,7 +331,13 @@ def draft():
             ORDER BY adp
                  """
         
-        draft_data = pd.DataFrame(db.session.execute(query), columns=['player', 'position', 'fantasy_points', 'adp'])      
+        draft_data = pd.DataFrame(db.session.execute(query), columns=['player', 'position', 'fantasy_points', 'adp']) 
+
+        if 'kickers_flag' not in request.form:
+            draft_data = draft_data.loc[draft_data['position'] != 'K']
+        if 'defenses_flag' not in request.form:
+            draft_data = draft_data.loc[draft_data['position'] != 'DST']
+
         draft_data['fantasy_points'] =  draft_data['fantasy_points'].astype(float).round(1)
         draft_data['adp'] =  draft_data['adp'].astype(float).round(1).fillna(999.9)
         draft_data.fillna(0, inplace=True)
@@ -361,7 +384,7 @@ def draft_data():
         free_agents = [p.calc_urgency(state_copy).calc_gap(replacements) for p in free_agents]
     else: 
         replacements = []
-        for pos in ['QB', 'WR', 'RB', 'TE']:
+        for pos in ['QB', 'WR', 'RB', 'TE', 'K', 'DST']:
             replacement = next((r for r in free_agents[picks_until_next[counter]:] if r.position == pos), NflPlayer('N/A', pos, 999.9, 0))
             replacements.append(replacement) 
         free_agents = [p.calc_urgency_adp(counter, picks_until_next, free_agents).calc_gap(replacements) for p in free_agents]
@@ -412,7 +435,7 @@ def num_rounds(system):
     elif system == 'Dynasty':    
         choices = [*range(20, 31)]
     else:
-        choices = [*range(10, 17)]
+        choices = [*range(12, 19)]
     return jsonify({'num_rounds': choices})
 
 

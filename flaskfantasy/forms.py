@@ -29,8 +29,12 @@ class SettingsForm(FlaskForm):
     
     roster_size = SelectField('Roster size',
                               validators=[InputRequired()],
-                              choices=[i for i in range(10, 17)],
-                              default=13)
+                              choices=[*range(12, 19)],
+                              default=15)
+
+    kickers_flag = BooleanField('Kickers', default="checked")
+
+    defenses_flag = BooleanField('Defenses', default="checked")
 
     keepers_flag = BooleanField('Keepers')
 
@@ -72,6 +76,41 @@ class SettingsForm(FlaskForm):
     fumble_lst = DecimalField('Fumble lost',
                             validators=[InputRequired()],
                             default=-2,
+                            places=0)
+
+    field_goal = DecimalField('Field goal',
+                            validators=[InputRequired()],
+                            default=3,
+                            places=0)
+
+    extra_pt = DecimalField('Extra point',
+                            validators=[InputRequired()],
+                            default=1,
+                            places=0)
+
+    sack = DecimalField('Sack',
+                            validators=[InputRequired()],
+                            default=1,
+                            places=0)
+
+    interception = DecimalField('Interception',
+                            validators=[InputRequired()],
+                            default=2,
+                            places=0) 
+
+    fumble_recovered = DecimalField('Fumble recovered',
+                            validators=[InputRequired()],
+                            default=2,
+                            places=0) 
+
+    def_td = DecimalField('Touchdown',
+                            validators=[InputRequired()],
+                            default=6,
+                            places=0)
+
+    safety = DecimalField('Safety',
+                            validators=[InputRequired()],
+                            default=2,
                             places=0)
     
     save_settings = SubmitField('Next')

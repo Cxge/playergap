@@ -48,6 +48,14 @@
                       <label class="form-check-label" for="inlineRadio5">TE</label>
                     </div>
                     <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio7" data-val="K">
+                      <label class="form-check-label" for="inlineRadio7">K</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio8" data-val="DST">
+                      <label class="form-check-label" for="inlineRadio8">DST</label>
+                    </div>
+                    <div class="form-check form-check-inline">
                       <input class="search form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio6" data-val="RB|WR|TE">
                       <label class="form-check-label" for="inlineRadio6">Flex</label>
                     </div>
@@ -95,17 +103,21 @@
                </div> 
             </div> 
             <div class="col-lg-3 mb-4">
-                <div class="content-section h-100">
-                    <h5 id="prevpicklabel" class="fw-bold"></h5>
-                    <h6 id="prevteamlabel" class="border-bottom pb-2"></h6>
-                    <div class="d-flex align-items-center flex-column justify-content-center m-auto">
-                        <br><p id="prevplayerlabel"></p>
-                        <p id="prevposlabel"></p>
-                        <div>
-                            <button id="undo-btn" class="btn btn-custom" disabled>Undo</button>
+                <div class="content-section container-fluid d-flex h-100 flex-column">
+                    <div>
+                        <div class="col">
+                            <h5 id="prevpicklabel" class="fw-bold"></h5>
+                            <h6 id="prevteamlabel" class="border-bottom pb-2"></h6>
                         </div>
-                    </div> 
-                </div>        
+                    </div>
+                    <div class="flex-fill d-flex flex-column justify-content-center align-items-center">
+                            <h5 id="prevplayerlabel" class="text-center fw-bold pb-2"></h5>
+                            <h5 id="prevposlabel" class="text-center fw-bold pb-4"></h5>
+                            <div>
+                                <button id="undo-btn" class="btn btn-custom" disabled>Undo</button>
+                            </div>
+                    </div>
+                </div>       
             </div>
         </div>
     </div>    
@@ -207,7 +219,7 @@
                 'columnDefs': [
                     { render: DataTable.render.number(',', '.', '1'), targets: [2, 3] }
                 ],
-                'order': [[ 1, 'asc' ]]
+                'order': [[ 1, 'desc' ]]
                 });
             
                 var teamtable = $('#teamtable').DataTable({
