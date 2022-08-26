@@ -103,7 +103,7 @@ class SettingsForm(FlaskForm):
                             default=2,
                             places=0) 
 
-    def_td = DecimalField('Touchdown',
+    def_td = DecimalField('Defense touchdown',
                             validators=[InputRequired()],
                             default=6,
                             places=0)

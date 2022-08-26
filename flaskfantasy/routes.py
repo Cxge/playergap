@@ -81,22 +81,22 @@ class DraftState:
         self.rosters[self.team_pick - 1].append(player)
         self.team_pick = self.team_picks[self.counter]
 
-    def get_replacements(self):
+    def get_replacements(self, positions):
         if self.system == '1-QB':
             pos_weights = {
-                'QB': [1, 0.6],
-                'WR': [1, 1, 0.8, 0.8, 0.6, 0.4],
-                'RB': [1, 1, 0.8, 0.8, 0.6, 0.4],
-                'TE': [1, 0.6],
+                'QB': [1],
+                'WR': [1, 1, 1, 1],
+                'RB': [1, 1, 1, 1],
+                'TE': [1],
                 'K': [1],
                 'DST': [1]
             }
         else:
             pos_weights = {
-                'QB': [1, 1, 0.8, 0.4],
-                'WR': [1, 1, 0.8, 0.8, 0.6, 0.4],
-                'RB': [1, 1, 0.8, 0.8, 0.6, 0.4],
-                'TE': [1, 0.6],
+                'QB': [1, 1],
+                'WR': [1, 1, 1, 1],
+                'RB': [1, 1, 1, 1],
+                'TE': [1],
                 'K': [1],
                 'DST': [1]
             }
@@ -104,16 +104,16 @@ class DraftState:
         for tm in self.team_picks[self.counter:next((i for i,n in enumerate(self.picks_ov) if n >= self.next_pick_ov))]:
             roster = self.rosters[tm - 1]
             moves = []
-            for pos in pos_weights.keys():
+            for pos in positions:
                 pos_num = sum(1 for pl in roster if pl.position == pos)
-                pos_wgt = pos_weights[pos][pos_num] if len(pos_weights[pos]) > pos_num else 0.2
+                pos_wgt = pos_weights[pos][pos_num] if len(pos_weights[pos]) > pos_num else 0.8
                 move = next((m for m in deepcopy(self).free_agents if m.position == pos), NflPlayer('N/A', pos, 999.9, 0))
                 move.adp /= pos_wgt
                 moves.append(move)
             pick = min(moves, key=lambda x: x.adp)
             self.make_projection(pick.player)
         replacements = []
-        for pos in pos_weights.keys():
+        for pos in positions:
             replacement = next((r for r in self.free_agents if r.position == pos), NflPlayer('N/A', pos, 999.9, 0))
             replacements.append(replacement) 
         return replacements
@@ -377,14 +377,15 @@ def draft_data():
     counter = session['state'].counter
     free_agents = session['state'].free_agents
     picks_until_next = session['state'].picks_until_next
+    positions = {p.position for p in free_agents}
     
     if session['state'].system in ['1-QB', '2-QB']:
         state_copy = deepcopy(session['state'])
-        replacements = state_copy.get_replacements()
+        replacements = state_copy.get_replacements(positions)
         free_agents = [p.calc_urgency(state_copy).calc_gap(replacements) for p in free_agents]
     else: 
         replacements = []
-        for pos in ['QB', 'WR', 'RB', 'TE', 'K', 'DST']:
+        for pos in positions:
             replacement = next((r for r in free_agents[picks_until_next[counter]:] if r.position == pos), NflPlayer('N/A', pos, 999.9, 0))
             replacements.append(replacement) 
         free_agents = [p.calc_urgency_adp(counter, picks_until_next, free_agents).calc_gap(replacements) for p in free_agents]
