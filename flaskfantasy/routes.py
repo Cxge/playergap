@@ -4,6 +4,7 @@ from json import loads
 from copy import deepcopy
 from flask import render_template, url_for, request, redirect, session, jsonify, flash
 from flask_mail import Message
+from sqlalchemy import text
 
 from flaskfantasy import app, db, mail
 from flaskfantasy.forms import SettingsForm, ContactForm
@@ -266,7 +267,7 @@ def draft():
         col_join = 'B.player, B.position, A.fantasy_points, B.adp' if system == 'Rookie' else 'A.player, A.position, A.fantasy_points, B.adp'
     
         if adp_source == 'All (Average)':
-            adp_query = f"""SELECT A.player, A.position, AVG(A.adp) AS adp
+            adp_query = text(f"""SELECT A.player, A.position, AVG(A.adp) AS adp
                             FROM adp A
                             INNER JOIN (
                                 SELECT source_name, MAX(source_update) AS source_update
@@ -281,10 +282,10 @@ def draft():
                             AND system = '{system}'
                             AND scoring = '{scoring_format}'
                             GROUP BY A.player, A.position
-            """
+            """)
 
         else:
-            adp_query = f"""SELECT player, position, adp
+            adp_query = text(f"""SELECT player, position, adp
                              FROM adp
                              WHERE season = {season} 
                              AND system = '{system}'
@@ -297,9 +298,9 @@ def draft():
                                                      AND scoring = '{scoring_format}'
                                                      AND source_name = '{adp_source}'
                                                  )
-            """    
+            """)
 
-        query = f"""
+        query = text(f"""
         SELECT {col_join}
         FROM        
             (SELECT player, position, pass_yd / {pass_yd}
@@ -329,7 +330,7 @@ def draft():
             ) B
             ON (A.player=B.player AND A.position=B.position)
             ORDER BY adp
-                 """
+                 """)
         
         draft_data = pd.DataFrame(db.session.execute(query), columns=['player', 'position', 'fantasy_points', 'adp']) 
 
